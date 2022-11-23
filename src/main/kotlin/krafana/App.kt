@@ -4,7 +4,7 @@ import krafana.Measure.*
 import krafana.TemplateRefresh.OnTimeRangeChanged
 
 fun main() {
-    val dataSource = DataSource.prometheus("8Hv9_rG4k")
+    val dataSource = DataSource.prometheus("YBK7ncD4z")
 
     ultraAutoScaleDashboard(dataSource)
         .json()
