@@ -62,11 +62,23 @@ fun Expr.deltaInterval(): Expr {
     return Expr("delta(${this.value}[\$__interval])")
 }
 
+fun Expr.idelta(range: Time): Expr {
+    return Expr("idelta(${this.value}[$range])")
+}
+
+fun Expr.ideltaInterval(): Expr {
+    return Expr("idelta(${this.value}[\$__interval])")
+}
+
 fun Expr.abs(): Expr {
     return Expr("abs($this)")
 }
 
 fun Metric.labelValues(label: Label): Expr {
     return Expr("label_values(${this.value}, ${label.value})")
+}
+
+fun Expr.quantileOverTime(quantile: Double, time: Time): Expr {
+    return Expr("quantile_over_time($quantile, $this[$time]")
 }
 

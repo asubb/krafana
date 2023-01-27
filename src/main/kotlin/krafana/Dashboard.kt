@@ -1,7 +1,6 @@
 package krafana
 
 import kotlinx.serialization.Serializable
-import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 @Serializable
