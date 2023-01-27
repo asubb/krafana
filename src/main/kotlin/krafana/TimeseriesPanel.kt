@@ -10,7 +10,7 @@ data class TimeseriesPanel(
     val targets: MutableList<Target> = mutableListOf(),
     val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
-    override var gridPos: GridPos = GridPos(0, 0, 24, 10),
+    override var gridPos: GridPos = GridPos(0, 0, 12, 10),
 ) : Panel {
     override val type: String = "timeseries"
 }
@@ -53,22 +53,38 @@ enum class ToolTipMode {
     Multi
 }
 
-fun Dashboard.with(datasource: DataSource, builder: Pair<Dashboard, DataSource>.() -> Unit) {
-    (this to datasource).apply(builder)
+data class DashboardParams(
+    val dashboard: Dashboard,
+    val datasource: DataSource,
+    val gridPosSequence: GridPosSequence,
+)
+
+fun Dashboard.with(
+    datasource: DataSource,
+    gridPosSequence: GridPosSequence = constant(),
+    builder: DashboardParams.() -> Unit
+) {
+    DashboardParams(this, datasource, gridPosSequence).apply(builder)
 }
 
-fun Pair<Dashboard, DataSource>.timeseries(
+fun DashboardParams.timeseries(
     title: String? = null,
     builder: TimeseriesPanel.() -> Unit
 ) {
-    this.first.timeseries(this.second) {
+    this.dashboard.timeseries(this.datasource, gridPosSequence) {
         title?.let { this.title = it }
         builder(this)
     }
 }
 
-fun Dashboard.timeseries(datasource: DataSource, builder: TimeseriesPanel.() -> Unit) {
-    this.panels += TimeseriesPanel(datasource).apply(builder)
+fun Dashboard.timeseries(
+    datasource: DataSource,
+    gridPosSequence: GridPosSequence = constant(),
+    builder: TimeseriesPanel.() -> Unit
+) {
+    this.panels += TimeseriesPanel(datasource)
+        .also { it.gridPos = gridPosSequence.next() }
+        .apply(builder)
 }
 
 var TimeseriesPanel.measure

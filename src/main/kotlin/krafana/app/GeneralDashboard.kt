@@ -9,7 +9,7 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
     liveNow = true
     refresh = 10.s
     time = (now - 3.h)..now
-    with(dataSource) {
+    with(dataSource, tile()) {
         timeseries("Last minute load average on the machine and vCPU count") {
             measure = none
             target {

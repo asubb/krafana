@@ -38,8 +38,8 @@ data class Query(
     var refId: String = Random.nextLong().absoluteValue.toString(36)
 )
 
-fun Pair<Dashboard, DataSource>.templating(builder: Pair<DataSource, Templating>.() -> Unit) {
-    builder(Pair(this.second, this.first.templating))
+fun DashboardParams.templating(builder: Pair<DataSource, Templating>.() -> Unit) {
+    builder(Pair(this.datasource, this.dashboard.templating))
 }
 
 fun Pair<DataSource, Templating>.template(name: Var, builder: Template.() -> Unit) {
