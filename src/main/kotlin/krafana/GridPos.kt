@@ -36,6 +36,5 @@ fun tile(width: Int = 12, height: Int = 10): GridPosSequence {
             }
             return gridPos
         }
-
     }
 }
