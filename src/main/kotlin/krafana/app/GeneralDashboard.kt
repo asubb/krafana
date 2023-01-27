@@ -12,213 +12,219 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
     with(dataSource, tile()) {
         timeseries("Last minute load average on the machine and vCPU count") {
             measure = none
-            target {
+            query {
                 expr = metric("plexnode_cpu_vcpus_count")
             }
-            val load1min = target {
+            val load1min = query {
                 expr = metric("plexnode_cpu_load_1min_average")
             }
-            expression {
-                resample(load1min, 5.m)
+            resampleExpression(load1min, 5.m) {
                 legend("cpu_load_5min_average")
             }
-            expression {
-                resample(load1min, 15.m)
+            resampleExpression(load1min, 15.m) {
                 legend("cpu_load_15min_average")
             }
         }
         timeseries("System/Process CPU Utilization (as % of total)") {
             measure = percent
-            target {
+            val cpuLoad = query {
                 expr = metric("plexnode_cpu_load_pct")
             }
-            target {
+            val cpuProcessLoad = query {
                 expr = cpuProcessLoad
+            }
+            resampleExpression(cpuLoad, 5.m) {
+                legend("cpu_load_pct_5min_average")
+            }
+            resampleExpression(cpuProcessLoad, 5.m) {
+                legend("cpu_proces_load_pct_5min_average")
             }
         }
         timeseries("Heap usage in bytes") {
             measure = bytes
-            target {
+            query {
                 expr = metric("plexnode_java_heap_total_bytes")
             }
-            val heapUsed = target {
+            val heapUsed = query {
                 expr = javaHeapUsedBytes
             }
-            expression {
-                resample(heapUsed, 5.m)
+            resampleExpression(heapUsed, 5.m) {
                 legend("java_heap_used_5min_mean", instance)
             }
         }
         timeseries("Percentage of the heap being used") {
             measure = percent
-            target {
+            val heapUsed = query {
                 expr = metric("plexnode_java_heap_used_pct")
+            }
+            resampleExpression(heapUsed, 5.m) {
+                legend("java_heap_used_pct_5min_mean", instance)
             }
         }
         timeseries("Disk usage in bytes") {
             measure = bytes
-            target {
+            query {
                 expr = metric("plexnode_disk_total_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_disk_usable_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_disk_used_bytes")
             }
         }
         timeseries("Percentage usable/used on the disk") {
             measure = percent
-            target {
+            query {
                 expr = metric("plexnode_disk_usable_pct")
             }
-            target {
+            query {
                 expr = metric("plexnode_disk_used_pct")
             }
         }
         timeseries("Physical memory") {
             measure = bytes
-            target {
+            query {
                 expr = metric("plexnode_mem_physical_total_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_mem_physical_used_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_mem_physical_free_bytes")
             }
         }
         timeseries("Swap memory") {
             measure = bytes
-            target {
+            query {
                 expr = metric("plexnode_mem_swap_total_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_mem_swap_used_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_mem_swap_free_bytes")
             }
         }
         timeseries("Virtual committed memory") {
             measure = bytes
-            target {
+            query {
                 expr = metric("plexnode_mem_virtual_committed_bytes")
             }
         }
         timeseries("Physical/Swap used percentage") {
             measure = percent
-            target {
+            query {
                 expr = metric("plexnode_mem_physical_used_pct")
             }
-            target {
+            query {
                 expr = metric("plexnode_mem_swap_used_pct")
             }
         }
         timeseries("Physical/Swap free percentage") {
             measure = percent
-            target {
+            query {
                 expr = metric("plexnode_mem_physical_free_pct")
             }
-            target {
+            query {
                 expr = metric("plexnode_mem_swap_free_pct")
             }
         }
         timeseries("File Descriptors") {
             measure = none
-            target {
+            query {
                 expr = metric("plexnode_file_descriptor_used_count")
             }
-            target {
+            query {
                 expr = metric("plexnode_file_descriptor_free_count")
             }
-            target {
+            query {
                 expr = metric("plexnode_file_descriptor_max")
             }
         }
         timeseries("File Descriptors used percentage") {
             measure = percent
-            target {
+            query {
                 expr = metric("plexnode_file_descriptor_used_pct")
             }
-            target {
+            query {
                 expr = metric("plexnode_file_descriptor_free_pct")
             }
         }
         timeseries("Threads/Slots") {
-            target {
+            query {
                 expr = metric("plexnode_thread_jvm_count")
             }
-            target {
+            query {
                 expr = metric("plexnode_slots_leased")
             }
-            target {
+            query {
                 expr = metric("plexnode_slots_max")
             }
         }
         timeseries("Slot leased percentage") {
             measure = percent
-            target {
+            query {
                 expr = metric("plexnode_slots_leased_pct")
             }
         }
         timeseries("Slot leased per path") {
-            target {
+            query {
                 expr = metric("plexnode_slots_leased_meter_total")
             }
         }
         timeseries("Slot leased per path rate") {
             measure = Measure.pps
-            target {
+            query {
                 expr = metric("plexnode_slots_leased_meter_oneminrate")
             }
-            target {
+            query {
                 expr = metric("plexnode_slots_leased_meter_meanrate")
             }
         }
         timeseries("Network recv/sent bytes") {
             measure = bytes
-            target {
+            query {
                 expr = metric("plexnode_net_received_bytes")
             }
-            target {
+            query {
                 expr = metric("plexnode_net_sent_bytes")
             }
         }
         timeseries("Network recv/sent/inError/outError/inDrops packet") {
-            target {
+            query {
                 expr = metric("plexnode_net_received_packets")
             }
-            target {
+            query {
                 expr = metric("plexnode_net_sent_packets")
             }
-            target {
+            query {
                 expr = metric("plexnode_net_in_errors")
             }
-            target {
+            query {
                 expr = metric("plexnode_net_out_errors")
             }
-            target {
+            query {
                 expr = metric("plexnode_net_in_drops")
             }
         }
         timeseries("Network speed") {
             measure = Measure.binbps
-            target {
+            query {
                 expr = metric("plexnode_net_speed")
             }
         }
         timeseries("Pipelines") {
-            target {
+            query {
                 expr = metric("plexnode_pipelines_initiated_meter_total")
             }
-            target {
+            query {
                 expr = metric("plexnode_pipelines_finished_meter_total")
             }
-            target {
+            query {
                 expr = pipelinesActiveTotal
             }
-            target {
+            query {
                 expr = metric("plexnode_pipelines_requested_meter_total")
             }
         }
@@ -227,25 +233,25 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
                 drawStyle = DrawStyle.Bars
                 fillOpacity = 100.0
             }
-            target {
+            query {
                 expr = scheduledTriggered.ideltaInterval()
             }
-            target {
+            query {
                 expr = scheduledRetried.ideltaInterval()
             }
-            target {
+            query {
                 expr = scheduledFailed.ideltaInterval()
             }
         }
         timeseries("Scheduled tasks delay") {
             measure = Measure.ms
-            target {
+            query {
                 expr = scheduledTriggeredP95
             }
-            target {
+            query {
                 expr = scheduledTriggeredP99
             }
-            target {
+            query {
                 expr = scheduledTriggeredMax
             }
         }
@@ -278,10 +284,10 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
 //            }
 //        }
         timeseries("Feedmaster Broker") {
-            target {
+            query {
                 expr = feedmasterEnqueued
             }
-            target {
+            query {
                 expr = feedmasterDequeued
             }
         }

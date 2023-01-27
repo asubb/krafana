@@ -5,7 +5,7 @@ import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 @Serializable
-data class Target(
+open class Target(
     var datasource: DataSource,
     var legendFormat: LegendFormat? = null,
     var expr: Expr? = null,
@@ -16,14 +16,48 @@ data class Target(
     var downsampler: DownsampleFunc? = null,
     var upsampler: UpsampleFunc? = null,
     var window: Time? = null
-)
+) {
+    override fun toString(): String {
+        return "Target(datasource=$datasource, legendFormat=$legendFormat, expr=$expr, refId='$refId', hide=$hide, type=$type, expression=$expression, downsampler=$downsampler, upsampler=$upsampler, window=$window)"
+    }
+}
 
 enum class TargetType {
     math,
     resample
 }
 
-fun TimeseriesPanel.target(
+@Serializable(AsStringSerializer::class)
+data class DownsampleFunc(val name: String) : SerializableAsString {
+    companion object {
+        val last = DownsampleFunc("last")
+        val mean = DownsampleFunc("mean")
+        val min = DownsampleFunc("min")
+        val max = DownsampleFunc("max")
+        val sum = DownsampleFunc("sum")
+    }
+
+    override fun serialize(): String {
+        return name
+    }
+}
+
+@Serializable(AsStringSerializer::class)
+data class UpsampleFunc(val name: String) : SerializableAsString {
+    companion object {
+        val pad = UpsampleFunc("pad")
+        val fillna = UpsampleFunc("fillna")
+        val backfilling = UpsampleFunc("backfilling")
+    }
+
+    override fun serialize(): String {
+        return name
+    }
+}
+
+class ExpressionTarget(datasource: DataSource) : Target(datasource)
+
+fun TimeseriesPanel.query(
     datasource: DataSource = this.datasource,
     builder: Target.() -> Unit
 ): RefId {
@@ -33,9 +67,11 @@ fun TimeseriesPanel.target(
 }
 
 fun TimeseriesPanel.expression(
-    builder: Target.() -> Unit
+    type: TargetType,
+    builder: ExpressionTarget.() -> Unit
 ): RefId {
-    val target = Target(DataSource.expression)
+    val target = ExpressionTarget(DataSource.expression)
+    target.type = type
     this.targets += target.apply(builder)
     return RefId(target.refId)
 }
@@ -52,48 +88,28 @@ fun Target.legend(legend: String, vararg labels: Expr) {
     }
 }
 
-fun Target.math(expr: Expr) {
-    this.type = TargetType.math
-    this.expression = expr
-}
-
-@Serializable(AsStringSerializer::class)
-data class DownsampleFunc(val name: String): SerializableAsString {
-    companion object {
-        val last = DownsampleFunc("last")
-        val mean = DownsampleFunc("mean")
-        val min = DownsampleFunc("min")
-        val max = DownsampleFunc("max")
-        val sum = DownsampleFunc("sum")
-    }
-
-    override fun serialize(): String {
-        return name
+fun TimeseriesPanel.mathExpression(
+    expr: Expr,
+    builder: (ExpressionTarget.() -> Unit)? = null
+) {
+    this.expression(TargetType.math) {
+        expression = expr
+        builder?.invoke(this)
     }
 }
 
-@Serializable(AsStringSerializer::class)
-data class UpsampleFunc(val name: String): SerializableAsString {
-    companion object {
-        val pad = UpsampleFunc("pad")
-        val fillna = UpsampleFunc("fillna")
-        val backfilling = UpsampleFunc("backfilling")
-    }
-
-    override fun serialize(): String {
-        return name
-    }
-}
-
-fun Target.resample(
+fun TimeseriesPanel.resampleExpression(
     expr: Expr,
     window: Time,
     downsampler: DownsampleFunc = DownsampleFunc.mean,
-    upsampler: UpsampleFunc = UpsampleFunc.fillna
-) {
-    this.type = TargetType.resample
-    this.expression = expr
-    this.downsampler = downsampler
-    this.upsampler = upsampler
-    this.window = window
+    upsampler: UpsampleFunc = UpsampleFunc.fillna,
+    builder: (ExpressionTarget.() -> Unit)? = null,
+): RefId {
+    return this.expression(TargetType.resample) {
+        this.expression = expr
+        this.downsampler = downsampler
+        this.upsampler = upsampler
+        this.window = window
+        builder?.invoke(this)
+    }
 }

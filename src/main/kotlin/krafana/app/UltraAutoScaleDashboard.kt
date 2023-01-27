@@ -11,62 +11,62 @@ fun ultraAutoScaleDashboard(dataSource: DataSource) = dashboard {
     time = (now - 15.m)..now
     with(dataSource) {
         timeseries("FM Enqueued-Dequeued") {
-            target {
+            query {
                 expr = feedmasterEnqueued
             }
-            target {
+            query {
                 expr = feedmasterDequeued
             }
         }
         timeseries("FM Enqueued-Dequeued diff (QueueLength)") {
-            target {
+            query {
                 expr = (feedmasterEnqueued - feedmasterDequeued).abs()
                 legend("abs(enqueued - dequeued)", taskPath, instance)
             }
         }
         timeseries("FM Enqueued-Dequeued 5 min rate") {
             measure = Measure.rps
-            target {
+            query {
                 expr = feedmasterEnqueued.rate(5.m)
                 legend("feedmaster_enqueued", taskPath, instance)
             }
-            target {
+            query {
                 expr = feedmasterDequeued.rate(5.m)
                 legend("feedmaster_dequeued", taskPath, instance)
             }
         }
         timeseries("Active Ultra pipelines") {
-            target {
+            query {
                 expr = pipelinesActiveTotal.filter(invokerType eq "ultra")
             }
         }
         timeseries("Scaling engine") {
-            target {
+            query {
                 expr = autoscale.changes(30.s)
                 legend("success", path, instance)
             }
-            target {
+            query {
                 expr = autoscaleFailed.changes(30.s)
                 legend("failure", path, instance)
             }
         }
         timeseries("Autoscaling: delta calculated, scaled") {
-            target {
+            query {
                 expr = autoscaleDelta.delta(30.s)
                 legend("delta", path, instance)
             }
-            target {
+            query {
                 expr = autoscaleScaled.delta(30.s)
                 legend("scaled", path, instance)
             }
         }
         timeseries("Plex leader") {
-            target {
+            query {
                 expr = plexStateLeader
             }
         }
         timeseries("Plex neighbors") {
-            target {
+            query {
                 expr = plexStateActiveNeighbors.sumBy(instance)
                 legend("active neighbors", instance)
             }

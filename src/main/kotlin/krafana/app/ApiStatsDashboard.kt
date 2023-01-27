@@ -12,21 +12,21 @@ fun apiStatsDashboard(dataSource: DataSource) = dashboard {
     with(dataSource) {
         timeseries {
             title = "Telemetry request count"
-            target {
+            query {
                 expr = telemetryMetricPusherCountTotal
             }
         }
         timeseries {
             title = "Telemetry request duration"
             measure = Measure.ms
-            target {
+            query {
                 expr = telemetryMetricPusherDuration99pct
             }
         }
         timeseries {
             title = "Telemetry request size"
             measure = Measure.bytes
-            target {
+            query {
                 expr = telemetryMetricPusherSize99pct
             }
         }

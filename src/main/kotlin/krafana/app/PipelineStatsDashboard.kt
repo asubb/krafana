@@ -1,10 +1,6 @@
 package krafana.app
 
 import krafana.*
-import krafana.DrawStyle
-import krafana.Stacking
-import krafana.StackingMode
-import krafana.dashboard
 
 fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
     title = "Pipeline stats"
@@ -21,86 +17,86 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             }
         }
         timeseries("Snap stats collected") {
-            target {
+            query {
                 expr = snapScrapped.filter(instanceId eq "null", ruuid re ruuidVar)
                 legend("snaps_scraped", ruuid, path)
             }
-            target {
+            query {
                 expr = snapStarted.filter(instanceId eq "null", ruuid re ruuidVar)
                 legend("snaps_started", ruuid, path)
             }
-            target {
+            query {
                 expr = snapFinished.filter(instanceId eq "null", ruuid re ruuidVar)
                 legend("snaps_finished", ruuid, path)
             }
         }
         timeseries("Snaps CPU Time") {
             measure = Measure.ns
-            target {
+            query {
                 expr = snapCpuTime.filter(instanceId ne "null", ruuid re ruuidVar)
                 legend("snap_cpu_time", instanceId, snapName, ruuid, path)
             }
-            target {
+            query {
                 expr = snapCpuTime.filter(instanceId eq "null", ruuid re ruuidVar)
                 legend("pipeline_cpu_time", ruuid, path)
             }
         }
         timeseries("Snaps CPU Wait") {
             measure = Measure.ns
-            target {
+            query {
                 expr = snapCpuWait.filter(instanceId ne "null", ruuid re ruuidVar)
                 legend("snap_cpu_wait", instanceId, snapName, ruuid, path)
             }
-            target {
+            query {
                 expr = snapCpuWait.filter(instanceId eq "null", ruuid re ruuidVar)
                 legend("pipeline_cpu_wait", ruuid, path)
             }
         }
         timeseries("Snaps CPU Block") {
             measure = Measure.ns
-            target {
+            query {
                 expr = snapCpuBlock.filter(instanceId ne "null", ruuid re ruuidVar)
                 legend("snap_cpu_block", instanceId, snapName, ruuid, path)
             }
-            target {
+            query {
                 expr = snapCpuBlock.filter(instanceId eq "null", ruuid re ruuidVar)
                 legend("pipeline_cpu_block", ruuid, path)
             }
         }
         timeseries("Snap ring buffer") {
-            target {
+            query {
                 expr = snapRingBufferSize.filter(instanceId ne "null", ruuid re ruuidVar)
                 legend("snap_buffer_size", instanceId, snapName, direction, ruuid, path)
             }
-            target {
+            query {
                 expr = snapRingBufferUsed.filter(instanceId ne "null", ruuid re ruuidVar)
                 legend("snap_buffer_used", instanceId, snapName, direction, ruuid, path)
             }
         }
         timeseries("Snap ring buffer bytes calculated") {
             measure = Measure.bytes
-            target {
+            query {
                 expr = snapRingBufferUsedBytes.filter(ruuid re ruuidVar).sumBy(ruuid, path)
                 legend("pipeline_used_bytes", ruuid, path)
             }
         }
         timeseries("Doc average size") {
             measure = Measure.bytes
-            target {
+            query {
                 expr = metric("plexnode_snap_doc_average_bytes").filter(ruuid re ruuidVar)
             }
         }
         timeseries("Snap in/out docs") {
-            target {
+            query {
                 expr = metric("plexnode_snap_input_doc_count_total").filter(ruuid re ruuidVar)
             }
-            target {
+            query {
                 expr = metric("plexnode_snap_output_doc_count_total").filter(ruuid re ruuidVar)
             }
         }
         timeseries("CC Heap memory") {
             measure = Measure.bytes
-            target {
+            query {
                 expr = javaHeapUsedBytes
             }
         }
@@ -112,26 +108,25 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                 stacking = Stacking(mode = StackingMode.Percent)
             }
 
-            val a = target {
+            val a = query {
                 expr = snapRingBufferUsedBytes.sum()
                 hide = true
             }
-            val b = target {
+            val b = query {
                 expr = snapRingBufferUsedBytes.sumBy(ruuid, path)
                 hide = true
             }
-            val c = target {
+            val c = query {
                 expr = javaHeapUsedBytes.sum()
                 hide = true
             }
-            expression {
-                math(b / a * c)
+            mathExpression(b / a * c) {
                 legend("pipeline_used_heap")
             }
         }
         timeseries("CC CPU process") {
             measure = Measure.percent
-            target {
+            query {
                 expr = cpuProcessLoad
             }
         }
@@ -142,21 +137,19 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                 fillOpacity = 100.0
                 stacking = Stacking(mode = StackingMode.Percent)
             }
-
-            val a = target {
+            val a = query {
                 expr = snapCpuTime.deltaInterval().sum()
                 hide = true
             }
-            val b = target {
+            val b = query {
                 expr = snapCpuTime.deltaInterval().sumBy(ruuid, path)
                 hide = true
             }
-            val c = target {
+            val c = query {
                 expr = cpuProcessLoad.sum()
                 hide = true
             }
-            expression {
-                math(b / a * c)
+            mathExpression(b / a * c) {
                 legend("pipeline_used_cpu")
             }
         }
