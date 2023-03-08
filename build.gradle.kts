@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClass.set("com.snaplogic.grafana.AppKt")
+    mainClass.set("krafana.app.AppKt")
 }
 
 repositories {
