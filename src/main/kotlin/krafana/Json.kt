@@ -4,7 +4,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 
-private val json = Json {
+val json = Json {
+    ignoreUnknownKeys = true
     serializersModule = SerializersModule {
         classDiscriminator = "_clazz"
         polymorphic(Panel::class, TimeseriesPanel::class, TimeseriesPanel.serializer())

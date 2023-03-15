@@ -8,10 +8,10 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
     editable = true
     liveNow = true
     refresh = 10.s
-    time = (now - 3.h)..now
+    time = (now - 15.m)..now
     with(dataSource, tile()) {
         timeseries("Last minute load average on the machine and vCPU count") {
-            measure = none
+//            measure = none
             query {
                 expr = metric("plexnode_cpu_vcpus_count")
             }

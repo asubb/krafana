@@ -1,23 +1,30 @@
 package krafana.app
 
-import krafana.*
+import kotlinx.coroutines.runBlocking
+import krafana.api.GrafanaApi
+import java.net.URL
 
 fun main() {
-    val dataSource = DataSource.prometheus("YBK7ncD4z")
+    val grafanaLocation = URL("http://localhost:3000")
+    val token =
+        "eyJrIjoiVjE1MHJxdEZIVG1wUnRTd1BMbENMMzBBbGdtTW1pUzEiLCJuIjoia3JhZmFuYSIsImlkIjoxfQ=="
 
-    ultraAutoScaleDashboard(dataSource)
-        .json()
-        .apply { println("Ultra autoscale dashboard:\n$this") }
+    runBlocking {
+        val grafanaApi = GrafanaApi(grafanaLocation, token)
 
-    generalDashboard(dataSource)
-        .json()
-        .apply { println("General dashboard:\n$this") }
+        val dataSource = grafanaApi.dataSource().findByName("Prometheus")
+        println("Found data source: $dataSource")
 
-    pipelineStatsDashboard(dataSource)
-        .json()
-        .apply { println("Pipeline stats dashboard:\n$this") }
+        ultraAutoScaleDashboard(dataSource)
+            .apply { grafanaApi.dashboard().import(this) }
 
-    apiStatsDashboard(dataSource)
-        .json()
-        .apply { println("API stats dashboard:\n$this") }
+        generalDashboard(dataSource)
+            .apply { grafanaApi.dashboard().import(this) }
+
+        pipelineStatsDashboard(dataSource)
+            .apply { grafanaApi.dashboard().import(this) }
+
+        apiStatsDashboard(dataSource)
+            .apply { grafanaApi.dashboard().import(this) }
+    }
 }
