@@ -14,7 +14,7 @@ interface GridPosSequence {
     fun next(): GridPos
 }
 
-fun constant(width: Int = 12, height: Int = 10): GridPosSequence {
+fun constant(width: Int = 24, height: Int = 10): GridPosSequence {
     return object : GridPosSequence {
         override fun next(): GridPos = GridPos(0, 0, width, height)
     }
