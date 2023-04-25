@@ -1,7 +1,9 @@
 package krafana.app
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import krafana.api.GrafanaApi
+import krafana.json
 import java.net.URL
 
 fun main(args: Array<String>) {
@@ -30,8 +32,10 @@ fun main(args: Array<String>) {
             apiStatsDashboard(dataSource),
         ).forEach {
             try {
-                grafanaApi.dashboard().import(it)
+                val dashboard = grafanaApi.dashboard()
+                dashboard.import(it)
                 println("Dashboard \"${it.title}\" has been imported")
+                println("Json:\n${json.encodeToString(it)}")
             } catch (e: Exception) {
                 println("Error importing \"${it.title}\"")
                 e.printStackTrace()

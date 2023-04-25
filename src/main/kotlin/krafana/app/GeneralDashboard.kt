@@ -45,6 +45,9 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
             query {
                 expr = metric("plexnode_java_heap_total_bytes")
             }
+            query {
+                expr = metric("plexnode_java_heap_max_bytes")
+            }
             val heapUsed = query {
                 expr = javaHeapUsedBytes
             }
@@ -52,13 +55,49 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
                 legend("java_heap_used_5min_mean", instance)
             }
         }
-        timeseries("Percentage of the heap being used") {
+        timeseries("Percentage of the heap being used (of total and max)") {
             measure = percent
             val heapUsed = query {
                 expr = metric("plexnode_java_heap_used_pct")
             }
             resampleExpression(heapUsed, 5.m) {
                 legend("java_heap_used_pct_5min_mean", instance)
+            }
+            val heapUsedOfMax = query {
+                expr = metric("plexnode_java_heap_used_of_max_pct")
+            }
+            resampleExpression(heapUsedOfMax, 5.m) {
+                legend("java_heap_used_of_max_pct_5min_mean", instance)
+            }
+        }
+        timeseries("Non-heap usage in bytes") {
+            measure = bytes
+            query {
+                expr = metric("plexnode_java_nonheap_total_bytes")
+            }
+            query {
+                expr = metric("plexnode_java_nonheap_max_bytes")
+            }
+            val nonheapUsed = query {
+                expr = javaNonHeapUsedBytes
+            }
+            resampleExpression(nonheapUsed, 5.m) {
+                legend("java_nonheap_used_5min_mean", instance)
+            }
+        }
+        timeseries("Percentage of the non-heap being used (of total and max)") {
+            measure = percent
+            val nonheapUsed = query {
+                expr = metric("plexnode_java_non_heap_used_pct")
+            }
+            resampleExpression(nonheapUsed, 5.m) {
+                legend("java_nonheap_used_pct_5min_mean", instance)
+            }
+            val nonheapUsedOfMax = query {
+                expr = metric("plexnode_java_nonheap_used_of_max_pct")
+            }
+            resampleExpression(nonheapUsedOfMax, 5.m) {
+                legend("java_heap_used_of_max_pct_5min_mean", instance)
             }
         }
         timeseries("Disk usage in bytes") {
