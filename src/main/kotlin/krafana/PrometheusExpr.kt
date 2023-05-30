@@ -58,6 +58,10 @@ fun Expr.delta(range: Time): Expr {
     return Expr("delta(${this.value}[$range])")
 }
 
+/**
+ * [Prometheus delta function](https://prometheus.io/docs/prometheus/latest/querying/functions/#delta)
+ * with sampling interval as a parameter
+ */
 fun Expr.deltaInterval(): Expr {
     return Expr("delta(${this.value}[\$__interval])")
 }
