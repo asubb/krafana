@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
         println("Found data source: $dataSource")
 
         listOf(
-            ultraAutoScaleDashboard(dataSource),
+            ultraDashboard(dataSource),
             generalDashboard(dataSource),
             pipelineStatsDashboard(dataSource),
             apiStatsDashboard(dataSource),

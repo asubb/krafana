@@ -78,9 +78,11 @@ fun TimeseriesPanel.expression(
 
 fun Target.legend(legend: String, vararg labels: Expr) {
     if (datasource != DataSource.expression) {
-        val labelsString = labels.joinToString(" ", prefix = "{", postfix = "}") {
-            "${it.value}=\"{{${it.value}}}\""
-        }
+        val labelsString =
+            if (labels.isEmpty()) ""
+            else labels.joinToString(" ", prefix = "{", postfix = "}") {
+                "${it.value}=\"{{${it.value}}}\""
+            }
         this.legendFormat = LegendFormat(legend +
                 labelsString.let { if (it.isEmpty()) it else " $it" })
     } else {

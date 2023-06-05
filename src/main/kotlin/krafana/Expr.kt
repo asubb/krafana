@@ -41,7 +41,7 @@ class Label(name: String) : Expr(name)
 
 class Metric(name: String) : Expr(name)
 
-class RefId(val ref: String) : Expr("$$ref")
+class RefId(ref: String) : Expr("$$ref")
 
 fun variable(name: String): Var = Var(name)
 
