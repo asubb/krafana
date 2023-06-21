@@ -88,6 +88,10 @@ fun ultraDashboard(dataSource: DataSource) = dashboard {
                 expr = ultraEnact.ideltaInterval().sumBy(instance)
                 legend("Enact", instance)
             }
+            query {
+                expr = ultraBlocked.ideltaInterval().sumBy(path)
+                legend("Blocked by path", path)
+            }
         }
         timeseries("Ultra Keeper assessments distribution") {
             query {
@@ -107,12 +111,13 @@ fun ultraDashboard(dataSource: DataSource) = dashboard {
             }
         }
         timeseries("Ultra Keeper durations") {
+            description = "The time taken for assessment on the leader and to enact on the nodes"
             measure = Measure.ms
             query {
                 expr = ultraAssessmentP99
             }
             query {
-               expr =  ultraAssessmentFailedP99
+                expr =  ultraAssessmentFailedP99
             }
             query {
                 expr =  ultraAssessmentCalcP99
@@ -127,7 +132,7 @@ fun ultraDashboard(dataSource: DataSource) = dashboard {
                 expr = ultraEnactP99
             }
         }
-        timeseries("Ultra prepare/close") {
+        timeseries("Ultra prepare/close (success/failure)") {
             query {
                 expr = ultraPrepare.ideltaInterval().sumBy(path)
                 legend("Prepare by path", path)
@@ -145,7 +150,33 @@ fun ultraDashboard(dataSource: DataSource) = dashboard {
                 legend("Close failed by path", path)
             }
         }
-        timeseries("Ultra prepare/close durations") {
+        timeseries("Ultra tuples activity") {
+            query {
+                expr = ultraTuplePrepare.ideltaInterval().sumBy(path)
+                legend("Prepare tuple by path", path)
+            }
+            query {
+                expr = ultraTupleClose.ideltaInterval().sumBy(path)
+                legend("Close tuple by path", path)
+            }
+            query {
+                expr = ultraTuplePrepareFinished.ideltaInterval().sumBy(path)
+                legend("Prepare tuple finished by path", path)
+            }
+            query {
+                expr = ultraTupleCloseFinished.ideltaInterval().sumBy(path)
+                legend("Close tuple finished by path", path)
+            }
+            query {
+                expr = ultraTupleScheduled.ideltaInterval().sumBy(path)
+                legend("Tuple scheduled by path", path)
+            }
+            query {
+                expr = ultraTupleSkipped.ideltaInterval().sumBy(path)
+                legend("Tuple skipped by path", path)
+            }
+        }
+        timeseries("Ultra prepare/close durations (success/failure)") {
             measure = Measure.ms
             query {
                 expr = ultraPrepareP99
@@ -158,6 +189,12 @@ fun ultraDashboard(dataSource: DataSource) = dashboard {
             }
             query {
                 expr = ultraCloseFailedP99
+            }
+            query {
+                expr = ultraTuplePrepareFinishedP99
+            }
+            query {
+                expr = ultraTupleCloseFinishedP99
             }
         }
     }

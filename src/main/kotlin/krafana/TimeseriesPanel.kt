@@ -10,6 +10,7 @@ data class TimeseriesPanel(
     val targets: MutableList<Target> = mutableListOf(),
     val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
+    var description: String = "",
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
 ) : Panel {
     override val type: String = "timeseries"
