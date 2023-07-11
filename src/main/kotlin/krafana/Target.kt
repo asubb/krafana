@@ -15,16 +15,29 @@ open class Target(
     var expression: Expr? = null,
     var downsampler: DownsampleFunc? = null,
     var upsampler: UpsampleFunc? = null,
-    var window: Time? = null
+    var window: Time? = null,
+    var reducer: ReducerFunc? = null,
+    var settings: TargetSettings = TargetSettings()
 ) {
     override fun toString(): String {
         return "Target(datasource=$datasource, legendFormat=$legendFormat, expr=$expr, refId='$refId', hide=$hide, type=$type, expression=$expression, downsampler=$downsampler, upsampler=$upsampler, window=$window)"
     }
 }
 
+@Serializable
+data class TargetSettings(
+    var mode: TargetSettingsMode = TargetSettingsMode.dropNN
+)
+
+@Serializable
+enum class TargetSettingsMode {
+    dropNN,
+}
+
 enum class TargetType {
     math,
-    resample
+    resample,
+    reduce
 }
 
 @Serializable(AsStringSerializer::class)
@@ -55,9 +68,20 @@ data class UpsampleFunc(val name: String) : SerializableAsString {
     }
 }
 
+@Serializable(AsStringSerializer::class)
+data class ReducerFunc(val name: String) : SerializableAsString {
+    companion object {
+        val max = ReducerFunc("max")
+        val mean = ReducerFunc("mean")
+    }
+
+    override fun serialize(): String {
+        return name
+    }
+}
 class ExpressionTarget(datasource: DataSource) : Target(datasource)
 
-fun TimeseriesPanel.query(
+fun Panel.query(
     datasource: DataSource = this.datasource,
     builder: Target.() -> Unit
 ): RefId {
@@ -66,7 +90,7 @@ fun TimeseriesPanel.query(
     return RefId(target.refId)
 }
 
-fun TimeseriesPanel.expression(
+fun Panel.expression(
     type: TargetType,
     builder: ExpressionTarget.() -> Unit
 ): RefId {
@@ -90,17 +114,29 @@ fun Target.legend(legend: String, vararg labels: Expr) {
     }
 }
 
-fun TimeseriesPanel.mathExpression(
+fun Panel.mathExpression(
     expr: Expr,
     builder: (ExpressionTarget.() -> Unit)? = null
-) {
-    this.expression(TargetType.math) {
+): RefId {
+    return this.expression(TargetType.math) {
         expression = expr
         builder?.invoke(this)
     }
 }
 
-fun TimeseriesPanel.resampleExpression(
+fun Panel.reduceExpression(
+    expr: Expr,
+    reducer: ReducerFunc,
+    builder: (ExpressionTarget.() -> Unit)? = null
+): RefId {
+    return this.expression(TargetType.reduce) {
+        this.expression = expr
+        this.reducer = reducer
+        builder?.invoke(this)
+    }
+}
+
+fun Panel.resampleExpression(
     expr: Expr,
     window: Time,
     downsampler: DownsampleFunc = DownsampleFunc.mean,

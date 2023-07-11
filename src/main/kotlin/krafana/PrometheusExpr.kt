@@ -46,6 +46,15 @@ fun Expr.sumBy(vararg by: Expr): Expr {
     return Expr("sum$byString(${this.value})")
 }
 
+fun Expr.avg(): Expr = avgBy()
+
+fun Expr.avgBy(vararg by: Expr): Expr {
+    val byString = by.takeIf { it.isNotEmpty() }
+        ?.joinToString(",", prefix = " by (", postfix = ")") { it.value }
+        ?: ""
+    return Expr("avg$byString(${this.value})")
+}
+
 fun Expr.changes(range: Time): Expr {
     return Expr("changes(${this.value}[$range])")
 }

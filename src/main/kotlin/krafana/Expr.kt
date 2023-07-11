@@ -49,5 +49,7 @@ fun metric(name: String): Metric = Metric(name)
 
 fun value(v: String): Expr = Expr("\"$v\"")
 
+fun value(v: Number): Expr = Expr("$v")
+
 fun label(label: String): Label = Label(label)
 

@@ -5,21 +5,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TimeseriesPanel(
-    val datasource: DataSource,
+    override val datasource: DataSource,
     val options: Options = Options(),
-    val targets: MutableList<Target> = mutableListOf(),
-    val fieldConfig: FieldConfig = FieldConfig(),
+    override val targets: MutableList<Target> = mutableListOf(),
+    override val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
     var description: String = "",
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
 ) : Panel {
     override val type: String = "timeseries"
 }
-
-@Serializable
-data class Options(
-    var tooltip: ToolTip = ToolTip(),
-)
 
 @Serializable
 data class DataSource(
@@ -57,7 +52,7 @@ enum class ToolTipMode {
 data class DashboardParams(
     val dashboard: Dashboard,
     val datasource: DataSource,
-    val gridPosSequence: GridPosSequence,
+    var gridPosSequence: GridPosSequence,
 )
 
 fun Dashboard.with(
@@ -78,6 +73,16 @@ fun DashboardParams.timeseries(
     }
 }
 
+fun RowParams.timeseries(
+    title: String? = null,
+    builder: TimeseriesPanel.() -> Unit
+) {
+    this.dashboardParams.dashboard.panels += TimeseriesPanel(this.dashboardParams.datasource)
+        .also { it.title = title ?: "" }
+        .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
+        .apply(builder)
+}
+
 fun Dashboard.timeseries(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
@@ -87,12 +92,6 @@ fun Dashboard.timeseries(
         .also { it.gridPos = gridPosSequence.next() }
         .apply(builder)
 }
-
-var TimeseriesPanel.measure
-    get() = fieldConfig.defaults.unit
-    set(value) {
-        this.fieldConfig.defaults.unit = value
-    }
 
 var TimeseriesPanel.toolTipMode
     get() = this.options.tooltip.mode

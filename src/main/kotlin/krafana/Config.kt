@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class Config(
     var unit: Measure = Measure.none,
     var custom: CustomConfig = CustomConfig(),
+    var color: ColorConfig = ColorConfig(),
 )
 
 @Serializable
@@ -49,6 +50,11 @@ enum class DrawStyle {
 @Serializable
 data class FieldConfig(
     var defaults: Config = Config(),
+)
+
+@Serializable
+data class ColorConfig(
+    var mode: String = "palette-classic"
 )
 
 @Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
