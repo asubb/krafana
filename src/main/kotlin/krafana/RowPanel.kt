@@ -14,6 +14,12 @@ data class RowPanel(
     override val targets: MutableList<Target>
         get() = throw UnsupportedOperationException()
     override val fieldConfig: FieldConfig = FieldConfig()
+    override var repeat: Expr?
+        get() = throw UnsupportedOperationException()
+        set(value) = throw UnsupportedOperationException()
+    override var repeatDirection: RepeatDirection?
+        get() = throw UnsupportedOperationException()
+        set(value) = throw UnsupportedOperationException()
 }
 
 data class RowParams(

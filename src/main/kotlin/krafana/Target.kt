@@ -73,6 +73,7 @@ data class ReducerFunc(val name: String) : SerializableAsString {
     companion object {
         val max = ReducerFunc("max")
         val mean = ReducerFunc("mean")
+        val sum = ReducerFunc("sum")
     }
 
     override fun serialize(): String {

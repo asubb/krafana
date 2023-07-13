@@ -5,6 +5,7 @@ import krafana.metric
 import krafana.variable
 
 val ruuidVar = variable("ruuid")
+val instanceVar = variable("instance")
 
 const val telemetry = "plexnode_api_telemetry"
 

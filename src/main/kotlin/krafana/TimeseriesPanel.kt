@@ -12,6 +12,8 @@ data class TimeseriesPanel(
     override var title: String = "",
     var description: String = "",
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
+    override var repeat: Expr? = null,
+    override var repeatDirection: RepeatDirection? = null,
 ) : Panel {
     override val type: String = "timeseries"
 }
