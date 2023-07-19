@@ -1,7 +1,7 @@
 package krafana.app
 
 import krafana.*
-import krafana.ReduceOptionsCalcs.*
+import krafana.Calcs.*
 
 fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
     title = "Pipeline stats"
@@ -13,41 +13,67 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
         gridPosSequence = tile()
         templating {
             template(ruuidVar) {
-                expr = snapScrapped.labelValues(ruuid)
+                expr = snapScraped.labelValues(ruuid)
                 refresh = TemplateRefresh.OnTimeRangeChanged
                 includeAll = true
             }
             template(instanceVar) {
-                expr = snapScrapped.labelValues(instance)
+                expr = snapScraped.labelValues(instance)
                 refresh = TemplateRefresh.OnTimeRangeChanged
                 includeAll = true
             }
         }
-        timeseries("Snap stats collected") {
+        timeseries("Stats collected") {
             gridPos = fullWidth()
             query {
-                expr = snapScrapped.filter(
-                    instanceId eq "null",
+                expr = snapScraped.filter(
+                    snapRuuid eq "null",
                     ruuid re ruuidVar,
                     instance re instanceVar
-                )
+                ).ideltaInterval()
                 legend("snaps_scraped", ruuid, path, instance)
             }
+        }
+        barchart("Running snaps") {
+            gridPos = fullWidth()
+            options.legend.calcs += last
+            options.legend.calcs += max
+            val input = query {
+                expr = snapStarted
+                    .filter(
+                        snapRuuid eq "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar
+                    )
+                    .sumBy(ruuid, path, instance)
+                hide = true
+                legend("Start", ruuid, path, instance)
+            }
+            val output = query {
+                expr = snapFinished
+                    .filter(
+                        snapRuuid eq "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar
+                    )
+                    .sumBy(ruuid, path, instance)
+                hide = true
+                legend("Finished", ruuid, path, instance)
+            }
+            mathExpression(input - output) {
+                legend("Active")
+            }
+        }
+        bargauge("Pipelines and their snaps") {
+            gridPos = fullWidth()
+            reduceOptions(calcs = max)
             query {
                 expr = snapStarted.filter(
-                    instanceId eq "null",
+                    snapRuuid eq "null",
                     ruuid re ruuidVar,
                     instance re instanceVar
-                )
-                legend("snaps_started", ruuid, path, instance)
-            }
-            query {
-                expr = snapFinished.filter(
-                    instanceId eq "null",
-                    ruuid re ruuidVar,
-                    instance re instanceVar
-                )
-                legend("snaps_finished", ruuid, path, instance)
+                ).sumBy(ruuid, path, instance)
+                legend("snaps count", ruuid, path, instance)
             }
         }
         row("Snap CPU") {
@@ -55,39 +81,39 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                 measure = Measure.ns
                 query {
                     expr = snapCpuTime.filter(
-                        instanceId ne "null",
+                        snapRuuid ne "null",
                         ruuid re ruuidVar,
                         instance re instanceVar
                     )
-                    legend("snap_cpu_time", instanceId, snapName, ruuid, path, instance)
+                    legend("snap_cpu_time", snapRuuid, snapName, ruuid, path, instance)
                 }
             }
             timeseries("Snaps CPU Wait") {
                 measure = Measure.ns
                 query {
                     expr = snapCpuWait.filter(
-                        instanceId ne "null",
+                        snapRuuid ne "null",
                         ruuid re ruuidVar,
                         instance re instanceVar
                     )
-                    legend("snap_cpu_wait", instanceId, snapName, ruuid, path, instance)
+                    legend("snap_cpu_wait", snapRuuid, snapName, ruuid, path, instance)
                 }
             }
             timeseries("Snaps CPU Block") {
                 measure = Measure.ns
                 query {
                     expr = snapCpuBlock.filter(
-                        instanceId ne "null",
+                        snapRuuid ne "null",
                         ruuid re ruuidVar,
                         instance re instanceVar
                     )
-                    legend("snap_cpu_block", instanceId, snapName, ruuid, path, instance)
+                    legend("snap_cpu_block", snapRuuid, snapName, ruuid, path, instance)
                 }
             }
         }
         row("Pipeline CPU") {
             val pipelineCpuTime =
-                snapCpuTime.filter(instanceId eq "null", ruuid re ruuidVar, instance re instanceVar)
+                snapCpuTime.filter(snapRuuid eq "null", ruuid re ruuidVar, instance re instanceVar)
             timeseries("CPU Time") {
                 measure = Measure.ns
                 query {
@@ -99,7 +125,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                 measure = Measure.ns
                 query {
                     expr = snapCpuWait.filter(
-                        instanceId eq "null",
+                        snapRuuid eq "null",
                         ruuid re ruuidVar,
                         instance re instanceVar
                     )
@@ -110,7 +136,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                 measure = Measure.ns
                 query {
                     expr = snapCpuBlock.filter(
-                        instanceId eq "null",
+                        snapRuuid eq "null",
                         ruuid re ruuidVar,
                         instance re instanceVar
                     )
@@ -143,17 +169,6 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                 }
                 pipelineUsedCPU()
             }
-            timeseries("Active pipelines by Path") {
-                config {
-                    drawStyle = DrawStyle.Bars
-                    fillOpacity = 100.0
-                    stacking = Stacking(mode = StackingMode.Normal)
-                }
-
-                query {
-                    expr = pipelineCpuTime.countBy(path)
-                }
-            }
             bargauge("Top pipelines CPU usage by path (average time for execution)") {
                 measure = Measure.ns
                 colorMode = "continuous-GrYlRd"
@@ -170,26 +185,153 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
                     legend("Pipeline")
                 }
             }
-        }
-        row("Snap Memory") {
-            timeseries("Snap ring buffer") {
-                query {
-                    expr = snapRingBufferSize.filter(instanceId ne "null", ruuid re ruuidVar)
-                    legend("snap_buffer_size", instanceId, snapName, direction, ruuid, path)
+            bargauge("Top pipelines CPU usage by executions") {
+                measure = Measure.ns
+                colorMode = "continuous-GrYlRd"
+                reduceOptions(calcs = mean)
+                val usageByPath = query {
+                    expr = pipelineCpuTime.deltaInterval().sumBy(ruuid)
+                    hide = true
+                }
+                val countForPath = query {
+                    expr = pipelineCpuTime.countBy(ruuid)
+                    hide = true
+                }
+                mathExpression(usageByPath / countForPath) {
+                    legend("Pipeline")
                 }
             }
-            timeseries("Doc average size") {
+        }
+        row("Snap Memory") {
+            timeseries("Snap ring buffer total size IN") {
+                query {
+                    expr = snapRingBufferSize.filter(
+                        snapRuuid ne "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "in"
+                    )
+                    legend(
+                        "snap_buffer_size",
+                        snapRuuid,
+                        snapName,
+                        direction,
+                        ruuid,
+                        path,
+                        viewName
+                    )
+                }
+            }
+            timeseries("Snap ring buffer used IN") {
+                query {
+                    expr = snapRingBufferUsed.filter(
+                        snapRuuid ne "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "in"
+                    )
+                    legend(
+                        "snap_buffer_size",
+                        snapRuuid,
+                        snapName,
+                        direction,
+                        ruuid,
+                        path,
+                        viewName
+                    )
+                }
+            }
+            timeseries("Snap ring buffer used bytes IN") {
                 measure = Measure.bytes
                 query {
-                    expr = metric("plexnode_snap_doc_average_bytes").filter(ruuid re ruuidVar)
+                    expr = snapRingBufferUsedBytes.filter(
+                        snapRuuid ne "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "in"
+                    )
+                    legend("snap_buffer_size", snapRuuid, snapName, direction, ruuid, path)
+                }
+            }
+            timeseries("Snap ring buffer total size OUT") {
+                query {
+                    expr = snapRingBufferSize.filter(
+                        snapRuuid ne "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "out"
+                    )
+                    legend("snap_buffer_size", snapRuuid, snapName, direction, ruuid, path)
+                }
+            }
+            timeseries("Snap ring buffer used OUT") {
+                query {
+                    expr = snapRingBufferUsed.filter(
+                        snapRuuid ne "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "out"
+                    )
+                    legend("snap_buffer_size", snapRuuid, snapName, direction, ruuid, path)
+                }
+            }
+            timeseries("Snap ring buffer used bytes OUT") {
+                measure = Measure.bytes
+                query {
+                    expr = snapRingBufferUsedBytes.filter(
+                        snapRuuid ne "null",
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "out"
+                    )
+                    legend("snap_buffer_size", snapRuuid, snapName, direction, ruuid, path)
+                }
+            }
+            barchart("Doc average size by path/snap/view") {
+                measure = Measure.bytes
+                options.legend.calcs += last
+                options.legend.calcs += max
+                query {
+                    expr = metric("plexnode_snap_doc_average_bytes")
+                        .filter(
+                            ruuid re ruuidVar,
+                            instance re instanceVar,
+                        )
+                        .avgBy(path, snapName, viewName)
+                    legend("Doc size", path, snapName, viewName)
                 }
             }
             timeseries("Snap in/out docs") {
                 query {
-                    expr = metric("plexnode_snap_input_doc_count_total").filter(ruuid re ruuidVar)
+                    expr = metric("plexnode_snap_doc_count_total").filter(
+                        ruuid re ruuidVar,
+                        instance re instanceVar
+                    )
                 }
-                query {
-                    expr = metric("plexnode_snap_output_doc_count_total").filter(ruuid re ruuidVar)
+            }
+            barchart("Snap inflight docs") {
+                options.legend.calcs += last
+                options.legend.calcs += max
+                val input = query {
+                    expr = metric("plexnode_snap_doc_count_total").filter(
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "in"
+                    ).sumBy(snapName, snapRuuid, ruuid)
+                    hide = true
+                    legend("In", snapName, snapRuuid, ruuid)
+                }
+                val output = query {
+                    expr = metric("plexnode_snap_doc_count_total").filter(
+                        ruuid re ruuidVar,
+                        instance re instanceVar,
+                        direction eq "out"
+                    ).sumBy(snapName, snapRuuid, ruuid)
+                    hide = true
+                    legend("Out", snapName, snapRuuid, ruuid)
+                }
+                mathExpression(input - output) {
+                    legend("Inflight")
                 }
             }
         }
@@ -197,19 +339,21 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             timeseries("Pipeline ring buffer bytes overall") {
                 measure = Measure.bytes
                 query {
-                    expr = snapRingBufferUsedBytes.filter(ruuid re ruuidVar).sumBy(ruuid, path)
-                    legend("pipeline_used_bytes", ruuid, path)
+                    expr =
+                        snapRingBufferUsedBytes.filter(ruuid re ruuidVar, instance re instanceVar)
+                            .sumBy(ruuid, path, instance)
+                    legend("pipeline_used_bytes", ruuid, path, instance)
                 }
             }
             timeseries("CC Heap memory") {
                 measure = Measure.bytes
                 query {
-                    expr = javaHeapUsedBytes
+                    expr = javaHeapUsedBytes.filter(instance re instanceVar)
                 }
             }
             timeseries("Distribution of Pipeline Heap Usage projection ${'$'}instance") {
                 measure = Measure.bytes
-                repeatVertical(instance)
+                repeatHorizontal(instance)
                 config {
                     drawStyle = DrawStyle.Bars
                     fillOpacity = 100.0
@@ -220,7 +364,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             }
             timeseries("Distribution of Pipeline Heap Usage projection on ${'$'}instance") {
                 measure = Measure.bytes
-                repeatVertical(instance)
+                repeatHorizontal(instance)
                 config {
                     drawStyle = DrawStyle.Bars
                     fillOpacity = 100.0
@@ -229,26 +373,54 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
 
                 pipelineUsedHeap()
             }
-            timeseries("Active pipelines by Path") {
-                config {
-                    drawStyle = DrawStyle.Bars
-                    fillOpacity = 100.0
-                    stacking = Stacking(mode = StackingMode.Normal)
-                }
-                query {
-                    expr = snapRingBufferUsedBytes.countBy(path)
-                }
-            }
-            bargauge("Top pipelines memory usage by path (mean over the period)") {
+            bargauge("Top pipelines memory usage by path (average per pipeline)") {
                 measure = Measure.bytes
                 colorMode = "continuous-GrYlRd"
                 reduceOptions(calcs = mean)
                 val usageByPath = query {
-                    expr = snapRingBufferUsedBytes.sumBy(path)
+                    expr = snapRingBufferUsedBytes
+                        .filter(
+                            ruuid re ruuidVar,
+                            instance re instanceVar
+                        )
+                        .sumBy(path)
                     hide = true
                 }
                 val countForPath = query {
-                    expr = snapRingBufferUsedBytes.countBy(path)
+                    expr = snapScraped
+                        .filter(
+                            snapRuuid eq "null",
+                            ruuid re ruuidVar,
+                            instance re instanceVar
+                        )
+                        .countBy(path)
+                    hide = true
+                }
+                mathExpression(usageByPath / countForPath) {
+                    legend("Pipeline")
+                }
+            }
+            bargauge("Top pipelines memory usage by executions") {
+                measure = Measure.bytes
+                colorMode = "continuous-GrYlRd"
+                reduceOptions(calcs = mean)
+                val usageByPath = query {
+                    expr = snapRingBufferUsedBytes
+                        .filter(
+                            ruuid re ruuidVar,
+                            instance re instanceVar
+                        )
+                        .sumBy(ruuid)
+                    hide = true
+                }
+                val countForPath = query {
+                    expr = snapScraped
+                        .filter(
+                            snapRuuid eq "null",
+                            ruuid re ruuidVar,
+                            instance re instanceVar
+                        )
+                        .countBy(ruuid)
                     hide = true
                 }
                 mathExpression(usageByPath / countForPath) {
@@ -259,13 +431,17 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
     }
 }
 
-private fun Panel.pipelineUsedHeap() {
+private fun Panel<*>.pipelineUsedHeap() {
     val a = query {
-        expr = snapRingBufferUsedBytes.filter(instance re instanceVar).sumBy(instance)
+        expr = snapRingBufferUsedBytes
+            .filter(ruuid re ruuidVar, instance re instanceVar)
+            .sumBy(instance)
         hide = true
     }
     val b = query {
-        expr = snapRingBufferUsedBytes.filter(instance re instanceVar).sumBy(ruuid, path, instance)
+        expr = snapRingBufferUsedBytes
+            .filter(ruuid re ruuidVar, instance re instanceVar)
+            .sumBy(ruuid, path, instance)
         hide = true
     }
     val c = query {
@@ -277,10 +453,10 @@ private fun Panel.pipelineUsedHeap() {
     }
 }
 
-private fun Panel.pipelineUsedCPU() {
+private fun Panel<*>.pipelineUsedCPU() {
     val a = query {
         expr = snapCpuTime.filter(
-            instanceId eq "null",
+            snapRuuid eq "null",
             ruuid re ruuidVar,
             instance re instanceVar
         )
@@ -289,7 +465,7 @@ private fun Panel.pipelineUsedCPU() {
         hide = true
     }
     val b = query {
-        expr = snapCpuTime.filter(instanceId eq "null", ruuid re ruuidVar, instance re instanceVar)
+        expr = snapCpuTime.filter(snapRuuid eq "null", ruuid re ruuidVar, instance re instanceVar)
             .deltaInterval().sumBy(ruuid, path, instance)
         hide = true
     }

@@ -82,7 +82,7 @@ data class ReducerFunc(val name: String) : SerializableAsString {
 }
 class ExpressionTarget(datasource: DataSource) : Target(datasource)
 
-fun Panel.query(
+fun Panel<*>.query(
     datasource: DataSource = this.datasource,
     builder: Target.() -> Unit
 ): RefId {
@@ -91,7 +91,7 @@ fun Panel.query(
     return RefId(target.refId)
 }
 
-fun Panel.expression(
+fun Panel<*>.expression(
     type: TargetType,
     builder: ExpressionTarget.() -> Unit
 ): RefId {
@@ -115,7 +115,7 @@ fun Target.legend(legend: String, vararg labels: Expr) {
     }
 }
 
-fun Panel.mathExpression(
+fun Panel<*>.mathExpression(
     expr: Expr,
     builder: (ExpressionTarget.() -> Unit)? = null
 ): RefId {
@@ -125,7 +125,7 @@ fun Panel.mathExpression(
     }
 }
 
-fun Panel.reduceExpression(
+fun Panel<*>.reduceExpression(
     expr: Expr,
     reducer: ReducerFunc,
     builder: (ExpressionTarget.() -> Unit)? = null
@@ -137,7 +137,7 @@ fun Panel.reduceExpression(
     }
 }
 
-fun Panel.resampleExpression(
+fun Panel<*>.resampleExpression(
     expr: Expr,
     window: Time,
     downsampler: DownsampleFunc = DownsampleFunc.mean,

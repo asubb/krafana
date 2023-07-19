@@ -6,8 +6,7 @@ import kotlinx.serialization.Serializable
 data class RowPanel(
     override var title: String,
     override var gridPos: GridPos,
-    var panels: MutableList<Panel>,
-): Panel {
+): Panel<Any> {
     override val type: String = "row"
     override val datasource: DataSource
         get() = throw UnsupportedOperationException()
@@ -20,6 +19,8 @@ data class RowPanel(
     override var repeatDirection: RepeatDirection?
         get() = throw UnsupportedOperationException()
         set(value) = throw UnsupportedOperationException()
+    override val options: Options
+        get() = throw UnsupportedOperationException()
 }
 
 data class RowParams(
@@ -31,7 +32,7 @@ fun DashboardParams.row(
     title: String,
     builder: RowParams.() -> Unit
 ) {
-    val row = RowPanel(title, this.fullWidth(), mutableListOf())
+    val row = RowPanel(title, this.fullWidth())
     val params = RowParams(row, this)
     this.dashboard.panels += row
     builder.invoke(params)

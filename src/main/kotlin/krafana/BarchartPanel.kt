@@ -3,7 +3,7 @@ package krafana
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TimeseriesPanel(
+data class BarchartPanel(
     override val datasource: DataSource,
     override val options: Options = Options(),
     override val targets: MutableList<Target> = mutableListOf(),
@@ -14,39 +14,35 @@ data class TimeseriesPanel(
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
 ) : Panel<Options> {
-    override val type: String = "timeseries"
+    override val type: String = "barchart"
 }
 
-fun DashboardParams.timeseries(
+fun DashboardParams.barchart(
     title: String? = null,
-    builder: TimeseriesPanel.() -> Unit
+    builder: BarchartPanel.() -> Unit
 ) {
-    this.dashboard.timeseries(this.datasource, gridPosSequence) {
+    this.dashboard.barchart(this.datasource, gridPosSequence) {
         title?.let { this.title = it }
         builder(this)
     }
 }
 
-fun RowParams.timeseries(
+fun RowParams.barchart(
     title: String? = null,
-    builder: TimeseriesPanel.() -> Unit
+    builder: BarchartPanel.() -> Unit
 ) {
-    this.dashboardParams.dashboard.panels += TimeseriesPanel(this.dashboardParams.datasource)
+    this.dashboardParams.dashboard.panels += BarchartPanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
         .apply(builder)
 }
 
-fun Dashboard.timeseries(
+fun Dashboard.barchart(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
-    builder: TimeseriesPanel.() -> Unit
+    builder: BarchartPanel.() -> Unit
 ) {
-    this.panels += TimeseriesPanel(datasource)
+    this.panels += BarchartPanel(datasource)
         .also { it.gridPos = gridPosSequence.next() }
         .apply(builder)
-}
-
-fun TimeseriesPanel.config(builder: CustomConfig.() -> Unit) {
-    builder(this.fieldConfig.defaults.custom)
 }

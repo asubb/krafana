@@ -1,6 +1,6 @@
 package krafana
 
-interface Panel {
+interface Panel<out O> {
     val type: String
     var title: String
     var gridPos: GridPos
@@ -9,29 +9,30 @@ interface Panel {
     val fieldConfig: FieldConfig
     var repeat: Expr?
     var repeatDirection: RepeatDirection?
+    val options: O
 }
 
 enum class RepeatDirection {
     h, v
 }
 
-fun Panel.repeatHorizontal(e: Expr) {
+fun Panel<*>.repeatHorizontal(e: Expr) {
     repeat = e
     repeatDirection = RepeatDirection.h
 }
 
-fun Panel.repeatVertical(e: Expr) {
+fun Panel<*>.repeatVertical(e: Expr) {
     repeat = e
     repeatDirection = RepeatDirection.v
 }
 
-var Panel.measure
+var Panel<*>.measure
     get() = fieldConfig.defaults.unit
     set(value) {
         this.fieldConfig.defaults.unit = value
     }
 
-var Panel.colorMode
+var Panel<*>.colorMode
     get() = fieldConfig.defaults.color.mode
     set(value) {
         this.fieldConfig.defaults.color.mode = value

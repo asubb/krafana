@@ -1,12 +1,12 @@
 package krafana
 
 import kotlinx.serialization.Serializable
-import krafana.ReduceOptionsCalcs.last
+import krafana.Calcs.last
 
 @Serializable
-data class BarGaugePanel(
+data class BargaugePanel(
     override val datasource: DataSource,
-    val options: BarGaugeOptions = BarGaugeOptions(),
+    override val options: BargaugeOptions = BargaugeOptions(),
     override val targets: MutableList<Target> = mutableListOf(),
     override val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
@@ -14,16 +14,8 @@ data class BarGaugePanel(
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
-) : Panel {
+) : Panel<BargaugeOptions> {
     override val type: String = "bargauge"
-}
-
-@Serializable
-enum class ReduceOptionsCalcs {
-    last,
-    mean,
-    sum,
-    max,
 }
 
 @Serializable
@@ -31,25 +23,21 @@ enum class BarGaugeOrientation {
     horizontal,
     vertical
 }
+
 @Serializable
 data class ReduceOptions (
-    var calcs: MutableList<ReduceOptionsCalcs> = mutableListOf(last),
+    var calcs: MutableList<Calcs> = mutableListOf(last),
     var fields: String = ""
 )
 @Serializable
-data class BarGaugeOptions(
+data class BargaugeOptions(
     var orientation: BarGaugeOrientation = BarGaugeOrientation.horizontal,
     var reduceOptions: ReduceOptions = ReduceOptions(),
 )
 
-@Serializable
-data class Options(
-    var tooltip: ToolTip = ToolTip(),
-)
-
 fun DashboardParams.bargauge(
     title: String? = null,
-    builder: BarGaugePanel.() -> Unit
+    builder: BargaugePanel.() -> Unit
 ) {
     this.dashboard.bargauge(this.datasource, gridPosSequence) {
         title?.let { this.title = it }
@@ -59,9 +47,9 @@ fun DashboardParams.bargauge(
 
 fun RowParams.bargauge(
     title: String? = null,
-    builder: BarGaugePanel.() -> Unit
+    builder: BargaugePanel.() -> Unit
 ) {
-    this.dashboardParams.dashboard.panels += BarGaugePanel(this.dashboardParams.datasource)
+    this.dashboardParams.dashboard.panels += BargaugePanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
         .apply(builder)
@@ -70,14 +58,14 @@ fun RowParams.bargauge(
 fun Dashboard.bargauge(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
-    builder: BarGaugePanel.() -> Unit
+    builder: BargaugePanel.() -> Unit
 ) {
-    this.panels += BarGaugePanel(datasource)
+    this.panels += BargaugePanel(datasource)
         .also { it.gridPos = gridPosSequence.next() }
         .apply(builder)
 }
 
 
-fun BarGaugePanel.reduceOptions(calcs: ReduceOptionsCalcs) {
+fun BargaugePanel.reduceOptions(calcs: Calcs) {
     this.options.reduceOptions.calcs = mutableListOf(calcs)
 }
