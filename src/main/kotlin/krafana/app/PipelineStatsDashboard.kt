@@ -454,26 +454,35 @@ private fun Panel<*>.pipelineUsedHeap() {
 }
 
 private fun Panel<*>.pipelineUsedCPU() {
-    val a = query {
-        expr = snapCpuTime.filter(
-            snapRuuid eq "null",
-            ruuid re ruuidVar,
-            instance re instanceVar
-        )
+    val allPipelinesConsumption = query {
+        expr = snapCpuTime
+            .filter(
+                snapRuuid eq "null",
+                ruuid re ruuidVar,
+                instance re instanceVar
+            )
             .deltaInterval()
             .sumBy(instance)
         hide = true
     }
-    val b = query {
-        expr = snapCpuTime.filter(snapRuuid eq "null", ruuid re ruuidVar, instance re instanceVar)
-            .deltaInterval().sumBy(ruuid, path, instance)
+    val thePipelineConsumption = query {
+        expr = snapCpuTime
+            .filter(
+                snapRuuid eq "null",
+                ruuid re ruuidVar,
+                instance re instanceVar
+            )
+            .deltaInterval()
+            .sumBy(ruuid, path, instance)
         hide = true
     }
-    val c = query {
-        expr = cpuProcessLoad.filter(instance re instanceVar).sumBy(instance)
+    val instanceLoad = query {
+        expr = cpuProcessLoad
+            .filter(instance re instanceVar)
+            .sumBy(instance)
         hide = true
     }
-    mathExpression(b / a * c) {
+    mathExpression(thePipelineConsumption / allPipelinesConsumption * instanceLoad) {
         legend("pipeline_used_cpu", instance, ruuid, path)
     }
 }
