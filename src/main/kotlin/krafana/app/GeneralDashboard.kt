@@ -10,13 +10,19 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
     refresh = 10.s
     time = (now - 15.m)..now
     with(dataSource, tile()) {
+        templating {
+            template(instanceVar) {
+                expr = cpuProcessLoad.labelValues(instance)
+                refresh = TemplateRefresh.OnTimeRangeChanged
+                includeAll = true
+            }
+        }
         timeseries("Last minute load average on the machine and vCPU count") {
-//            measure = none
             query {
-                expr = metric("plexnode_cpu_vcpus_count")
+                expr = metric("plexnode_cpu_vcpus_count").filter(instance re instanceVar)
             }
             val load1min = query {
-                expr = metric("plexnode_cpu_load_1min_average")
+                expr = metric("plexnode_cpu_load_1min_average").filter(instance re instanceVar)
             }
             resampleExpression(load1min, 5.m) {
                 legend("cpu_load_5min_average")
@@ -28,10 +34,10 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
         timeseries("System/Process CPU Utilization (as % of total)") {
             measure = percent
             val cpuLoad = query {
-                expr = metric("plexnode_cpu_load_pct")
+                expr = metric("plexnode_cpu_load_pct").filter(instance re instanceVar)
             }
             val cpuProcessLoad = query {
-                expr = cpuProcessLoad
+                expr = cpuProcessLoad.filter(instance re instanceVar)
             }
             resampleExpression(cpuLoad, 5.m) {
                 legend("cpu_load_pct_5min_average")
@@ -43,13 +49,13 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
         timeseries("Heap usage in bytes") {
             measure = bytes
             query {
-                expr = metric("plexnode_java_heap_total_bytes")
+                expr = metric("plexnode_java_heap_total_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_java_heap_max_bytes")
+                expr = metric("plexnode_java_heap_max_bytes").filter(instance re instanceVar)
             }
             val heapUsed = query {
-                expr = javaHeapUsedBytes
+                expr = javaHeapUsedBytes.filter(instance re instanceVar)
             }
             resampleExpression(heapUsed, 5.m) {
                 legend("java_heap_used_5min_mean", instance)
@@ -58,13 +64,13 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
         timeseries("Percentage of the heap being used (of total and max)") {
             measure = percent
             val heapUsed = query {
-                expr = metric("plexnode_java_heap_used_pct")
+                expr = metric("plexnode_java_heap_used_pct").filter(instance re instanceVar)
             }
             resampleExpression(heapUsed, 5.m) {
                 legend("java_heap_used_pct_5min_mean", instance)
             }
             val heapUsedOfMax = query {
-                expr = metric("plexnode_java_heap_used_of_max_pct")
+                expr = metric("plexnode_java_heap_used_of_max_pct").filter(instance re instanceVar)
             }
             resampleExpression(heapUsedOfMax, 5.m) {
                 legend("java_heap_used_of_max_pct_5min_mean", instance)
@@ -73,13 +79,13 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
         timeseries("Non-heap usage in bytes") {
             measure = bytes
             query {
-                expr = metric("plexnode_java_nonheap_total_bytes")
+                expr = metric("plexnode_java_nonheap_total_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_java_nonheap_max_bytes")
+                expr = metric("plexnode_java_nonheap_max_bytes").filter(instance re instanceVar)
             }
             val nonheapUsed = query {
-                expr = javaNonHeapUsedBytes
+                expr = javaNonHeapUsedBytes.filter(instance re instanceVar)
             }
             resampleExpression(nonheapUsed, 5.m) {
                 legend("java_nonheap_used_5min_mean", instance)
@@ -88,13 +94,13 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
         timeseries("Percentage of the non-heap being used (of total and max)") {
             measure = percent
             val nonheapUsed = query {
-                expr = metric("plexnode_java_non_heap_used_pct")
+                expr = metric("plexnode_java_non_heap_used_pct").filter(instance re instanceVar)
             }
             resampleExpression(nonheapUsed, 5.m) {
                 legend("java_nonheap_used_pct_5min_mean", instance)
             }
             val nonheapUsedOfMax = query {
-                expr = metric("plexnode_java_nonheap_used_of_max_pct")
+                expr = metric("plexnode_java_nonheap_used_of_max_pct").filter(instance re instanceVar)
             }
             resampleExpression(nonheapUsedOfMax, 5.m) {
                 legend("java_heap_used_of_max_pct_5min_mean", instance)
@@ -103,168 +109,168 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
         timeseries("Disk usage in bytes") {
             measure = bytes
             query {
-                expr = metric("plexnode_disk_total_bytes")
+                expr = metric("plexnode_disk_total_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_disk_usable_bytes")
+                expr = metric("plexnode_disk_usable_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_disk_used_bytes")
+                expr = metric("plexnode_disk_used_bytes").filter(instance re instanceVar)
             }
         }
         timeseries("Percentage usable/used on the disk") {
             measure = percent
             query {
-                expr = metric("plexnode_disk_usable_pct")
+                expr = metric("plexnode_disk_usable_pct").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_disk_used_pct")
+                expr = metric("plexnode_disk_used_pct").filter(instance re instanceVar)
             }
         }
         timeseries("Physical memory") {
             measure = bytes
             query {
-                expr = metric("plexnode_mem_physical_total_bytes")
+                expr = metric("plexnode_mem_physical_total_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_mem_physical_used_bytes")
+                expr = metric("plexnode_mem_physical_used_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_mem_physical_free_bytes")
+                expr = metric("plexnode_mem_physical_free_bytes").filter(instance re instanceVar)
             }
         }
         timeseries("Swap memory") {
             measure = bytes
             query {
-                expr = metric("plexnode_mem_swap_total_bytes")
+                expr = metric("plexnode_mem_swap_total_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_mem_swap_used_bytes")
+                expr = metric("plexnode_mem_swap_used_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_mem_swap_free_bytes")
+                expr = metric("plexnode_mem_swap_free_bytes").filter(instance re instanceVar)
             }
         }
         timeseries("Virtual committed memory") {
             measure = bytes
             query {
-                expr = metric("plexnode_mem_virtual_committed_bytes")
+                expr = metric("plexnode_mem_virtual_committed_bytes").filter(instance re instanceVar)
             }
         }
         timeseries("Physical/Swap used percentage") {
             measure = percent
             query {
-                expr = metric("plexnode_mem_physical_used_pct")
+                expr = metric("plexnode_mem_physical_used_pct").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_mem_swap_used_pct")
+                expr = metric("plexnode_mem_swap_used_pct").filter(instance re instanceVar)
             }
         }
         timeseries("Physical/Swap free percentage") {
             measure = percent
             query {
-                expr = metric("plexnode_mem_physical_free_pct")
+                expr = metric("plexnode_mem_physical_free_pct").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_mem_swap_free_pct")
+                expr = metric("plexnode_mem_swap_free_pct").filter(instance re instanceVar)
             }
         }
         timeseries("File Descriptors") {
             measure = none
             query {
-                expr = metric("plexnode_file_descriptor_used_count")
+                expr = metric("plexnode_file_descriptor_used_count").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_file_descriptor_free_count")
+                expr = metric("plexnode_file_descriptor_free_count").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_file_descriptor_max")
+                expr = metric("plexnode_file_descriptor_max").filter(instance re instanceVar)
             }
         }
         timeseries("File Descriptors used percentage") {
             measure = percent
             query {
-                expr = metric("plexnode_file_descriptor_used_pct")
+                expr = metric("plexnode_file_descriptor_used_pct").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_file_descriptor_free_pct")
+                expr = metric("plexnode_file_descriptor_free_pct").filter(instance re instanceVar)
             }
         }
         timeseries("Threads/Slots") {
             query {
-                expr = metric("plexnode_thread_jvm_count")
+                expr = metric("plexnode_thread_jvm_count").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_slots_leased")
+                expr = metric("plexnode_slots_leased").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_slots_max")
+                expr = metric("plexnode_slots_max").filter(instance re instanceVar)
             }
         }
         timeseries("Slot leased percentage") {
             measure = percent
             query {
-                expr = metric("plexnode_slots_leased_pct")
+                expr = metric("plexnode_slots_leased_pct").filter(instance re instanceVar)
             }
         }
         timeseries("Slot leased per path") {
             query {
-                expr = metric("plexnode_slots_leased_meter_total")
+                expr = metric("plexnode_slots_leased_meter_total").filter(instance re instanceVar)
             }
         }
         timeseries("Slot leased per path rate") {
             measure = Measure.pps
             query {
-                expr = metric("plexnode_slots_leased_meter_oneminrate")
+                expr = metric("plexnode_slots_leased_meter_oneminrate").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_slots_leased_meter_meanrate")
+                expr = metric("plexnode_slots_leased_meter_meanrate").filter(instance re instanceVar)
             }
         }
         timeseries("Network recv/sent bytes") {
             measure = bytes
             query {
-                expr = metric("plexnode_net_received_bytes")
+                expr = metric("plexnode_net_received_bytes").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_net_sent_bytes")
+                expr = metric("plexnode_net_sent_bytes").filter(instance re instanceVar)
             }
         }
         timeseries("Network recv/sent/inError/outError/inDrops packet") {
             query {
-                expr = metric("plexnode_net_received_packets")
+                expr = metric("plexnode_net_received_packets").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_net_sent_packets")
+                expr = metric("plexnode_net_sent_packets").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_net_in_errors")
+                expr = metric("plexnode_net_in_errors").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_net_out_errors")
+                expr = metric("plexnode_net_out_errors").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_net_in_drops")
+                expr = metric("plexnode_net_in_drops").filter(instance re instanceVar)
             }
         }
         timeseries("Network speed") {
             measure = Measure.binbps
             query {
-                expr = metric("plexnode_net_speed")
+                expr = metric("plexnode_net_speed").filter(instance re instanceVar)
             }
         }
         timeseries("Pipelines") {
             query {
-                expr = metric("plexnode_pipelines_initiated_meter_total")
+                expr = metric("plexnode_pipelines_initiated_meter_total").filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_pipelines_finished_meter_total")
+                expr = metric("plexnode_pipelines_finished_meter_total").filter(instance re instanceVar)
             }
             query {
-                expr = pipelinesActiveTotal
+                expr = pipelinesActiveTotal.filter(instance re instanceVar)
             }
             query {
-                expr = metric("plexnode_pipelines_requested_meter_total")
+                expr = metric("plexnode_pipelines_requested_meter_total").filter(instance re instanceVar)
             }
         }
         timeseries("Scheduled tasks") {
@@ -273,25 +279,25 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
                 fillOpacity = 100.0
             }
             query {
-                expr = scheduledTriggered.ideltaInterval()
+                expr = scheduledTriggered.filter(instance re instanceVar).ideltaInterval()
             }
             query {
-                expr = scheduledRetried.ideltaInterval()
+                expr = scheduledRetried.filter(instance re instanceVar).ideltaInterval()
             }
             query {
-                expr = scheduledFailed.ideltaInterval()
+                expr = scheduledFailed.filter(instance re instanceVar).ideltaInterval()
             }
         }
         timeseries("Scheduled tasks delay") {
             measure = Measure.ms
             query {
-                expr = scheduledTriggeredP95
+                expr = scheduledTriggeredP95.filter(instance re instanceVar)
             }
             query {
-                expr = scheduledTriggeredP99
+                expr = scheduledTriggeredP99.filter(instance re instanceVar)
             }
             query {
-                expr = scheduledTriggeredMax
+                expr = scheduledTriggeredMax.filter(instance re instanceVar)
             }
         }
 //        timeseries("Tasks loading") {
@@ -324,10 +330,10 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
 //        }
         timeseries("Feedmaster Broker") {
             query {
-                expr = feedmasterEnqueued
+                expr = feedmasterEnqueued.filter(instance re instanceVar)
             }
             query {
-                expr = feedmasterDequeued
+                expr = feedmasterDequeued.filter(instance re instanceVar)
             }
         }
     }
