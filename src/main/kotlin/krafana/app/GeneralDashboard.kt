@@ -259,18 +259,28 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
                 expr = metric("plexnode_net_speed").filter(instance re instanceVar)
             }
         }
-        timeseries("Pipelines") {
+        timeseries("Pipelines started") {
             query {
-                expr = metric("plexnode_pipelines_initiated_meter_total").filter(instance re instanceVar)
+                expr = metric("plexnode_pipelines_initiated_meter_total")
+                    .filter(instance re instanceVar)
+                    .ideltaInterval()
             }
             query {
-                expr = metric("plexnode_pipelines_finished_meter_total").filter(instance re instanceVar)
+                expr = metric("plexnode_pipelines_requested_meter_total")
+                    .filter(instance re instanceVar)
+                    .ideltaInterval()
             }
+        }
+        timeseries("Pipelines finished") {
+            query {
+                expr = metric("plexnode_pipelines_finished_meter_total")
+                    .filter(instance re instanceVar)
+                    .ideltaInterval()
+            }
+        }
+        timeseries("Active Pipelines") {
             query {
                 expr = pipelinesActiveTotal.filter(instance re instanceVar)
-            }
-            query {
-                expr = metric("plexnode_pipelines_requested_meter_total").filter(instance re instanceVar)
             }
         }
         timeseries("Scheduled tasks") {

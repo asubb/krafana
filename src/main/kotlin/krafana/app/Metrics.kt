@@ -11,7 +11,7 @@ const val telemetry = "plexnode_api_telemetry"
 
 val feedmasterEnqueued = metric("feedmaster_enqueued")
 val feedmasterDequeued = metric("feedmaster_dequeued")
-val pipelinesActiveTotal = metric("plexnode_pipelines_active_meter_total")
+val pipelinesActiveTotal = metric("plexnode_pipelines_active_total")
 val autoscale = metric("plexnode_autoscale_count_total")
 val autoscaleDelta = metric("plexnode_autoscale_calc_delta_total")
 val autoscaleScaled = metric("plexnode_autoscale_scaled_total")
