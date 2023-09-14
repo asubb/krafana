@@ -91,6 +91,10 @@ fun Metric.labelValues(label: Label): Expr {
     return Expr("label_values(${this.value}, ${label.value})")
 }
 
+fun labelValues(label: Label): Expr {
+    return Expr("label_values(${label.value})")
+}
+
 fun Expr.quantileOverTime(quantile: Double, time: Time): Expr {
     return Expr("quantile_over_time($quantile, $this[$time]")
 }
