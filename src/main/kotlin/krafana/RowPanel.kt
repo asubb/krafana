@@ -32,6 +32,7 @@ fun DashboardParams.row(
     title: String,
     builder: RowParams.() -> Unit
 ) {
+    this.gridPosSequence.closeRow()
     val row = RowPanel(title, this.fullWidth())
     val params = RowParams(row, this)
     this.dashboard.panels += row

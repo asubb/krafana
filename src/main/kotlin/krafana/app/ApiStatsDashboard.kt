@@ -3,18 +3,35 @@ package krafana.app
 import krafana.*
 import krafana.dashboard
 
-fun apiStatsDashboard(dataSource: DataSource) = dashboard {
+fun telemetryApiStatsDashboard(dataSource: DataSource) = dashboard {
     title = "Plex API stats: Telemetry"
     editable = true
     liveNow = true
     refresh = 10.s
     time = (now - 15.m)..now
-    with(dataSource) {
+    with(dataSource, tileOneThird()) {
         templating {
             template(instanceVar) {
                 expr = labelValues(instance)
                 refresh = TemplateRefresh.OnTimeRangeChanged
                 includeAll = true
+            }
+        }
+        row("Queue") {
+            timeseries {
+                title = "Telemetry queue size"
+                query {
+                    expr = telemetryQueueSize
+                        .filter(instance re instanceVar)
+                }
+            }
+            timeseries {
+                measure = Measure.bytes
+                title = "Telemetry queue size in bytes"
+                query {
+                    expr = telemetryQueueSizeBytes
+                        .filter(instance re instanceVar)
+                }
             }
         }
         row("Successes") {
@@ -23,6 +40,7 @@ fun apiStatsDashboard(dataSource: DataSource) = dashboard {
                 query {
                     expr = telemetryMetricPusherCountTotal
                         .filter(instance re instanceVar)
+                        .ideltaInterval()
                 }
             }
             timeseries {
@@ -46,16 +64,23 @@ fun apiStatsDashboard(dataSource: DataSource) = dashboard {
                 }
             }
         }
-        row("Failures (statusCode >= 400, exception)") {
+        row("Failures (statusCode >= 400, exception, dropped)") {
             timeseries {
                 title = "Telemetry failures count"
                 query {
                     expr = telemetryMetricPusherCountFailedTotal
                         .filter(instance re instanceVar)
+                        .ideltaInterval()
                 }
                 query {
                     expr = telemetryMetricPusherExceptionTotal
                         .filter(instance re instanceVar)
+                        .ideltaInterval()
+                }
+                query {
+                    expr = telemetryMetricPusherDroppedTotal
+                        .filter(instance re instanceVar)
+                        .ideltaInterval()
                 }
             }
             timeseries {
@@ -68,6 +93,10 @@ fun apiStatsDashboard(dataSource: DataSource) = dashboard {
                     expr =
                         telemetryMetricPusherExceptionDuration99pct.filter(instance re instanceVar)
                 }
+                query {
+                    expr =
+                        telemetryMetricPusherDroppedDuration99pct.filter(instance re instanceVar)
+                }
             }
             timeseries {
                 title = "Telemetry failure packet size"
@@ -77,6 +106,9 @@ fun apiStatsDashboard(dataSource: DataSource) = dashboard {
                 }
                 query {
                     expr = telemetryMetricPusherExceptionSize99pct.filter(instance re instanceVar)
+                }
+                query {
+                    expr = telemetryMetricPusherDroppedSize99pct.filter(instance re instanceVar)
                 }
             }
             timeseries {
@@ -88,6 +120,10 @@ fun apiStatsDashboard(dataSource: DataSource) = dashboard {
                 query {
                     expr =
                         telemetryMetricPusherExceptionDatapoints99pct.filter(instance re instanceVar)
+                }
+                query {
+                    expr =
+                        telemetryMetricPusherDroppedDatapoints99pct.filter(instance re instanceVar)
                 }
             }
         }

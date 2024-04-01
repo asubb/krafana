@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
             ultraDashboard(dataSource),
             generalDashboard(dataSource),
             pipelineStatsDashboard(dataSource),
-            apiStatsDashboard(dataSource),
+            telemetryApiStatsDashboard(dataSource),
         ).forEach {
             try {
                 val dashboard = grafanaApi.dashboard()
