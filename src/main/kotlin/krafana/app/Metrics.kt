@@ -1,13 +1,58 @@
 package krafana.app
 
-import krafana.label
-import krafana.metric
-import krafana.variable
+import krafana.*
+
+object plexnode : Namespace(null, "plexnode") {
+
+    object api : Namespace(plexnode, "api") {
+
+        object telemetry : Namespace(api, "telemetry") {
+
+            object queue : Namespace(telemetry, "queue") {
+
+                object size : Namespace(queue, "size") {
+                    val elements = gauge()
+                    val bytes = gauge("bytes")
+                }
+            }
+
+            object metric : Namespace(telemetry, "metric") {
+
+                object dropped : Namespace(metric, "dropped") {
+                    val count = counter("")
+                    val size = histogram("size")
+                    val duration = histogram("duration")
+                    val datapoints = histogram("datapoints")
+                }
+            }
+
+            object metricPusher : Namespace(telemetry, "metric_pusher") {
+
+                object failed : Namespace(metricPusher, "failed") {
+                    val count = counter("count")
+                    val size = histogram("size")
+                    val duration = histogram("duration")
+                    val datapoints = histogram("datapoints")
+                }
+
+                object exception : Namespace(metricPusher, "exc") {
+                    val count = counter("count")
+                    val size = histogram("size")
+                    val duration = histogram("duration")
+                    val datapoints = histogram("datapoints")
+                }
+
+                val datapoints = histogram("datapoints")
+                val count = counter("count")
+                val size = histogram("size")
+                val duration = histogram("duration")
+            }
+        }
+    }
+}
 
 val ruuidVar = variable("ruuid")
 val instanceVar = variable("instance")
-
-const val telemetry = "plexnode_api_telemetry"
 
 val feedmasterEnqueued = metric("feedmaster_enqueued")
 val feedmasterDequeued = metric("feedmaster_dequeued")
@@ -30,24 +75,6 @@ val snapRingBufferSize = metric("plexnode_snap_ringbuffer_size")
 val javaHeapUsedBytes = metric("plexnode_java_heap_used_bytes")
 val javaNonHeapUsedBytes = metric("plexnode_java_nonheap_used_bytes")
 val cpuProcessLoad = metric("plexnode_cpu_process_load_pct")
-val telemetryMetricPusherCountTotal = metric("${telemetry}_metric_pusher_count_total")
-val telemetryMetricPusherSize99pct = metric("${telemetry}_metric_pusher_size_99pct")
-val telemetryMetricPusherDuration99pct = metric("${telemetry}_metric_pusher_duration_99pct")
-val telemetryMetricPusherDatapoints99pct = metric("${telemetry}_metric_pusher_datapoints_99pct")
-val telemetryMetricPusherCountFailedTotal = metric("${telemetry}_metric_pusher_failed_count_total")
-val telemetryMetricPusherFailedSize99pct = metric("${telemetry}_metric_pusher_failed_size_99pct")
-val telemetryMetricPusherFailedDuration99pct = metric("${telemetry}_metric_pusher_failed_duration_99pct")
-val telemetryMetricPusherFailedDatapoints99pct = metric("${telemetry}_metric_pusher_failed_datapoints_99pct")
-val telemetryMetricPusherExceptionTotal = metric("${telemetry}_metric_pusher_exc_count_total")
-val telemetryMetricPusherExceptionSize99pct = metric("${telemetry}_metric_pusher_exc_size_99pct")
-val telemetryMetricPusherExceptionDuration99pct = metric("${telemetry}_metric_pusher_exc_duration_99pct")
-val telemetryMetricPusherExceptionDatapoints99pct = metric("${telemetry}_metric_pusher_exc_datapoints_99pct")
-val telemetryMetricPusherDroppedTotal = metric("${telemetry}_metric_dropped_count_total")
-val telemetryMetricPusherDroppedSize99pct = metric("${telemetry}_metric_dropped_size_99pct")
-val telemetryMetricPusherDroppedDuration99pct = metric("${telemetry}_metric_dropped_duration_99pct")
-val telemetryMetricPusherDroppedDatapoints99pct = metric("${telemetry}_metric_dropped_datapoints_99pct")
-val telemetryQueueSize = metric("${telemetry}_queue_size")
-val telemetryQueueSizeBytes = metric("${telemetry}_queue_size_bytes")
 val scheduledTriggeredP95 = metric("plexnode_scheduled_triggered_delay_95pct")
 val scheduledTriggeredP99 = metric("plexnode_scheduled_triggered_delay_99pct")
 val scheduledTriggeredMax = metric("plexnode_scheduled_triggered_delay_max")

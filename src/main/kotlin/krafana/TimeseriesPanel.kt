@@ -19,7 +19,7 @@ data class TimeseriesPanel(
 
 fun DashboardParams.timeseries(
     title: String? = null,
-    builder: TimeseriesPanel.() -> Unit
+    builder: TimeseriesPanel.() -> Unit,
 ) {
     this.dashboard.timeseries(this.datasource, gridPosSequence) {
         title?.let { this.title = it }
@@ -29,18 +29,20 @@ fun DashboardParams.timeseries(
 
 fun RowParams.timeseries(
     title: String? = null,
-    builder: TimeseriesPanel.() -> Unit
+    drawStyle: DrawStyle? = null,
+    builder: TimeseriesPanel.() -> Unit,
 ) {
     this.dashboardParams.dashboard.panels += TimeseriesPanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
+        .also { if (drawStyle != null) it.fieldConfig.defaults.custom.drawStyle = drawStyle }
         .apply(builder)
 }
 
 fun Dashboard.timeseries(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
-    builder: TimeseriesPanel.() -> Unit
+    builder: TimeseriesPanel.() -> Unit,
 ) {
     this.panels += TimeseriesPanel(datasource)
         .also { it.gridPos = gridPosSequence.next() }
