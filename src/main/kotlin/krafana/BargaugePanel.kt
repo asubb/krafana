@@ -33,8 +33,13 @@ data class ReduceOptions (
 data class BargaugeOptions(
     var orientation: BarGaugeOrientation = BarGaugeOrientation.horizontal,
     var reduceOptions: ReduceOptions = ReduceOptions(),
+    var displayMode: DisplayMode? = null
 )
 
+@Serializable
+enum class DisplayMode {
+   basic, gradient, lcd
+}
 fun DashboardParams.bargauge(
     title: String? = null,
     builder: BargaugePanel.() -> Unit

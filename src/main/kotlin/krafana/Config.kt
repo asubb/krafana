@@ -14,7 +14,9 @@ data class Config(
 data class CustomConfig(
     var fillOpacity: Double = 0.0,
     var drawStyle: DrawStyle = DrawStyle.Lines,
-    var stacking: Stacking = Stacking()
+    var stacking: Stacking = Stacking(),
+    var axisCenteredZero: Boolean? = null,
+    var axisSoftMin: Int? = null,
 )
 
 @Serializable

@@ -1,6 +1,10 @@
 package krafana.app
 
 import krafana.*
+import krafana.metrics.Namespace
+import krafana.metrics.counter
+import krafana.metrics.gauge
+import krafana.metrics.histogram
 
 object plexnode : Namespace(null, "plexnode") {
 

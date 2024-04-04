@@ -2,6 +2,8 @@ plugins {
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.serialization") version "1.8.10"
     application
+    `maven-publish`
+    `java-library`
 }
 
 application {
@@ -23,4 +25,14 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("krafana") {
+            from(project.components["java"])
+            groupId = "com.github.asubb"
+            artifactId = "krafana"
 
+            artifact(tasks.kotlinSourcesJar)
+        }
+    }
+}

@@ -30,11 +30,13 @@ fun DashboardParams.timeseries(
 fun RowParams.timeseries(
     title: String? = null,
     drawStyle: DrawStyle? = null,
+    width: Int? = null,
+    height: Int? = null,
     builder: TimeseriesPanel.() -> Unit,
 ) {
     this.dashboardParams.dashboard.panels += TimeseriesPanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
-        .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
+        .also { it.gridPos = this.dashboardParams.gridPosSequence.next(width, height) }
         .also { if (drawStyle != null) it.fieldConfig.defaults.custom.drawStyle = drawStyle }
         .apply(builder)
 }
@@ -42,10 +44,12 @@ fun RowParams.timeseries(
 fun Dashboard.timeseries(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
+    width: Int? = null,
+    height: Int? = null,
     builder: TimeseriesPanel.() -> Unit,
 ) {
     this.panels += TimeseriesPanel(datasource)
-        .also { it.gridPos = gridPosSequence.next() }
+        .also { it.gridPos = gridPosSequence.next(width, height) }
         .apply(builder)
 }
 

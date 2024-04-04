@@ -16,9 +16,12 @@ interface GridPosSequence {
     fun closeRow()
 }
 
-fun DashboardParams.fullWidth(height: Int = 10): GridPos = gridPosSequence.next(24, height)
+const val defaultGridHeight = 10
+const val gridMaxWidth = 24
 
-fun constant(width: Int = 24, height: Int = 10): GridPosSequence {
+fun DashboardParams.fullWidth(height: Int = defaultGridHeight): GridPos = gridPosSequence.next(24, height)
+
+fun constant(width: Int = 24, height: Int = defaultGridHeight): GridPosSequence {
     return object : GridPosSequence {
         override fun next(w: Int?, h: Int?): GridPos = GridPos(0, 0, w ?: width, h ?: height)
         override fun closeRow() {
@@ -27,18 +30,16 @@ fun constant(width: Int = 24, height: Int = 10): GridPosSequence {
     }
 }
 
-private const val maxWidth = 24
-
-fun tileOneThird(height: Int = 10): GridPosSequence {
-    return tile(width = maxWidth / 3, height)
+fun tileOneThird(height: Int = defaultGridHeight): GridPosSequence {
+    return tile(width = gridMaxWidth / 3, height)
 }
 
-fun tileOneForth(height: Int = 10): GridPosSequence {
-    return tile(width = maxWidth / 4, height)
+fun tileOneForth(height: Int = defaultGridHeight): GridPosSequence {
+    return tile(width = gridMaxWidth / 4, height)
 }
 
-fun tile(width: Int = maxWidth / 2, height: Int = 10): GridPosSequence {
-    require(width in 1..maxWidth) { "Width should be greater than zero but less than $maxWidth, but found: $width" }
+fun tile(width: Int = gridMaxWidth / 2, height: Int = defaultGridHeight): GridPosSequence {
+    require(width in 1..gridMaxWidth) { "Width should be greater than zero but less than $gridMaxWidth, but found: $width" }
     require(height > 0) { "Height should be greater that zero" }
     var row = 0
     var col = 0
@@ -48,7 +49,7 @@ fun tile(width: Int = maxWidth / 2, height: Int = 10): GridPosSequence {
             val gridPos = GridPos(col, row, w ?: width, h ?: height)
             if (h != null) prevH = max(h, height)
             col += w ?: width
-            if (col >= maxWidth) {
+            if (col >= gridMaxWidth) {
                 row += prevH
                 prevH = height
                 col = 0
