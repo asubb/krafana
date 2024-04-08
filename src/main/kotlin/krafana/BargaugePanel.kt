@@ -52,11 +52,13 @@ fun DashboardParams.bargauge(
 
 fun RowParams.bargauge(
     title: String? = null,
+    width: Int? = null,
+    height: Int? = null,
     builder: BargaugePanel.() -> Unit
 ) {
     this.dashboardParams.dashboard.panels += BargaugePanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
-        .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
+        .also { it.gridPos = this.dashboardParams.gridPosSequence.next(width, height) }
         .apply(builder)
 }
 
