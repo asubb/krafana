@@ -26,17 +26,13 @@ class GrafanaClient(
                 protocol = URLProtocol.createOrDefault(location.protocol)
                 host = location.host
                 port = location.port
-                path(path)
+                path(path.createPath())
             }
             headers {
                 append("Authorization", "Bearer $token")
             }
         }
-        require(response.status == HttpStatusCode.OK) {
-            "Got non-200 response: ${response.status}: ${
-                response.readBytes().decodeToString()
-            }"
-        }
+        response.failIfNotSuccess(path)
         return response.body()
     }
 
@@ -46,7 +42,7 @@ class GrafanaClient(
                 protocol = URLProtocol.createOrDefault(location.protocol)
                 host = location.host
                 port = location.port
-                path(path)
+                path(path.createPath())
                 contentType(ContentType.Application.Json)
                 setBody(payload)
             }
@@ -54,9 +50,16 @@ class GrafanaClient(
                 append("Authorization", "Bearer $token")
             }
         }
-        require(response.status == HttpStatusCode.OK) {
-            "Got non-200 response: ${response.status}: ${
-                response.readBytes().decodeToString()
+        response.failIfNotSuccess(path)
+    }
+
+    fun String.createPath() = location.path.removeSuffix("/") + "/" + removePrefix("/")
+
+    suspend fun HttpResponse.failIfNotSuccess(path: String) {
+        val req = "${location.protocol}://${location.host}:${location.port}${path.createPath()}"
+        require(status == HttpStatusCode.OK) {
+            "Got non-200 response for $req: $status: ${
+                readBytes().decodeToString()
             }"
         }
     }
