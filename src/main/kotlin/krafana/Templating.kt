@@ -12,7 +12,7 @@ data class Templating(
 @Serializable
 data class Template(
     val name: String,
-    val dataSource: DataSource,
+    val datasource: DataSource,
     var definition: Expr = Expr(""),
     var query: Query = Query(),
     var multi: Boolean = false,
