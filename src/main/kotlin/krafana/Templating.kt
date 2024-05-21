@@ -1,12 +1,16 @@
 package krafana
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 @Serializable
 data class Templating(
-    var list: MutableList<Template> = mutableListOf()
+    var list: MutableList<Template> = mutableListOf(),
 )
 
 @Serializable
@@ -18,8 +22,24 @@ data class Template(
     var multi: Boolean = false,
     var type: String = "query",
     var includeAll: Boolean = false,
-    var refresh: TemplateRefresh = TemplateRefresh.OnDashboardLoad
+    var refresh: TemplateRefresh = TemplateRefresh.OnDashboardLoad,
+    @Serializable(with = RegexSerializer::class)
+    var regex: Regex? = null,
 )
+
+object RegexSerializer : KSerializer<Regex> {
+    override val descriptor: SerialDescriptor
+        get() = AsStringSerializer.descriptor
+
+    override fun deserialize(decoder: Decoder): Regex {
+        return decoder.decodeString().toRegex()
+    }
+
+    override fun serialize(encoder: Encoder, value: Regex) {
+        encoder.encodeString(value.pattern)
+    }
+
+}
 
 @Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
 @Serializable(AsIntSerializer::class)
@@ -35,7 +55,7 @@ enum class TemplateRefresh(private val value: Int) : SerializableAsInt {
 @Serializable
 data class Query(
     var query: Expr = Expr(""),
-    var refId: String = Random.nextLong().absoluteValue.toString(36)
+    var refId: String = Random.nextLong().absoluteValue.toString(36),
 )
 
 fun DashboardParams.templating(builder: Pair<DataSource, Templating>.() -> Unit) {

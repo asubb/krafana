@@ -3,69 +3,64 @@ package krafana
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TimeseriesPanel(
+data class TablePanel(
     override val datasource: DataSource,
     override val options: Options = Options(),
     override val targets: MutableList<Target> = mutableListOf(),
     override val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
-    var description: String = "",
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
     var interval: Time? = null,
-) : Panel<Options> {
-    override val type: String = "timeseries"
+    var description: String = "",
+)
+: Panel<Options> {
+    override val type: String = "table"
 }
 
-fun DashboardParams.timeseries(
+fun DashboardParams.table(
     title: String? = null,
-    drawStyle: DrawStyle? = null,
     width: Int? = null,
     height: Int? = null,
-    builder: TimeseriesPanel.() -> Unit,
+    builder: TablePanel.() -> Unit,
 ) {
-    this.dashboard.timeseries(
+    this.dashboard.table(
         this.datasource,
         gridPosSequence,
         title,
-        drawStyle,
         width,
         height,
         builder
     )
 }
 
-fun RowParams.timeseries(
+fun RowParams.table(
     title: String? = null,
-    drawStyle: DrawStyle? = null,
     width: Int? = null,
     height: Int? = null,
-    builder: TimeseriesPanel.() -> Unit,
+    builder: TablePanel.() -> Unit,
 ) {
-    this.dashboardParams.dashboard.panels += TimeseriesPanel(this.dashboardParams.datasource)
+    this.dashboardParams.dashboard.panels += TablePanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = this.dashboardParams.gridPosSequence.next(width, height) }
-        .also { if (drawStyle != null) it.fieldConfig.defaults.custom.drawStyle = drawStyle }
         .apply(builder)
 }
 
-fun Dashboard.timeseries(
+fun Dashboard.table(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
     title: String? = null,
-    drawStyle: DrawStyle? = null,
     width: Int? = null,
     height: Int? = null,
-    builder: TimeseriesPanel.() -> Unit,
+    builder: TablePanel.() -> Unit,
 ) {
-    this.panels += TimeseriesPanel(datasource)
+    this.panels += TablePanel(datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = gridPosSequence.next(width, height) }
-        .also { if (drawStyle != null) it.fieldConfig.defaults.custom.drawStyle = drawStyle }
         .apply(builder)
 }
 
-fun TimeseriesPanel.config(builder: CustomConfig.() -> Unit) {
+fun TablePanel.config(builder: CustomConfig.() -> Unit) {
     builder(this.fieldConfig.defaults.custom)
 }

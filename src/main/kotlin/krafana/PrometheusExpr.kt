@@ -96,6 +96,9 @@ fun labelValues(label: Label): Expr {
 }
 
 fun Expr.quantileOverTime(quantile: Double, time: Time): Expr {
-    return Expr("quantile_over_time($quantile, $this[$time]")
+    return Expr("quantile_over_time($quantile, $this[$time])")
 }
 
+fun Expr.lastOverTime(time: Time): Expr {
+    return Expr("last_over_time($this[$time])")
+}

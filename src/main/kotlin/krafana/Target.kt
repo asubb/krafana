@@ -17,7 +17,10 @@ open class Target(
     var upsampler: UpsampleFunc? = null,
     var window: Time? = null,
     var reducer: ReducerFunc? = null,
-    var settings: TargetSettings = TargetSettings()
+    var settings: TargetSettings = TargetSettings(),
+    var format: Format? = Format.timeseries,
+    var instant: Boolean = false,
+    var range: Boolean = true,
 ) {
     override fun toString(): String {
         return "Target(datasource=$datasource, legendFormat=$legendFormat, expr=$expr, refId='$refId', hide=$hide, type=$type, expression=$expression, downsampler=$downsampler, upsampler=$upsampler, window=$window)"
@@ -32,6 +35,12 @@ data class TargetSettings(
 @Serializable
 enum class TargetSettingsMode {
     dropNN,
+}
+
+enum class Format {
+    timeseries,
+    table,
+    heatmap
 }
 
 enum class TargetType {

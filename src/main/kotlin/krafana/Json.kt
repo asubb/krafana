@@ -12,9 +12,8 @@ val json = Json {
         polymorphic(Panel::class, RowPanel::class, RowPanel.serializer())
         polymorphic(Panel::class, BargaugePanel::class, BargaugePanel.serializer())
         polymorphic(Panel::class, BarchartPanel::class, BarchartPanel.serializer())
-//        polymorphic(Expr::class, PrometheusExpr::class, PrometheusExpr.serializer())
+        polymorphic(Panel::class, TablePanel::class, TablePanel.serializer())
     }
-//    prettyPrint = true
     encodeDefaults = true
 }
 
