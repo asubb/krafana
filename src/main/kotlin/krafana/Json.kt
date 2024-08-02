@@ -15,6 +15,7 @@ val json = Json {
         polymorphic(Panel::class, TablePanel::class, TablePanel.serializer())
     }
     encodeDefaults = true
+    explicitNulls = false
 }
 
 fun Dashboard.json() = json.encodeToString(this)

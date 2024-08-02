@@ -55,6 +55,34 @@ fun Expr.avgBy(vararg by: Expr): Expr {
     return Expr("avg$byString(${this.value})")
 }
 
+fun Expr.min(): Expr = minBy()
+
+fun Expr.minBy(vararg by: Expr): Expr {
+    val byString = by.takeIf { it.isNotEmpty() }
+        ?.joinToString(",", prefix = " by (", postfix = ")") { it.value }
+        ?: ""
+    return Expr("min$byString(${this.value})")
+}
+
+fun Expr.max(): Expr = maxBy()
+
+fun Expr.maxBy(vararg by: Expr): Expr {
+    val byString = by.takeIf { it.isNotEmpty() }
+        ?.joinToString(",", prefix = " by (", postfix = ")") { it.value }
+        ?: ""
+    return Expr("max$byString(${this.value})")
+}
+
+fun Expr.quantile(q: Double): Expr = quantileBy(q)
+
+fun Expr.quantileBy(q: Double, vararg by: Expr): Expr {
+    require(q in 0.0..1.0) { "φ-quantile (0 ≤ φ ≤ 1): $q" }
+    val byString = by.takeIf { it.isNotEmpty() }
+        ?.joinToString(",", prefix = " by (", postfix = ")") { it.value }
+        ?: ""
+    return Expr("quantile($q, ${this.value})$byString")
+}
+
 fun Expr.changes(range: Time): Expr {
     return Expr("changes(${this.value}[$range])")
 }
