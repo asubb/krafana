@@ -19,9 +19,11 @@ data class BarchartPanel(
 
 fun DashboardParams.barchart(
     title: String? = null,
+    width: Int? = null,
+    height: Int? = null,
     builder: BarchartPanel.() -> Unit
 ) {
-    this.dashboard.barchart(this.datasource, gridPosSequence) {
+    this.dashboard.barchart(this.datasource, gridPosSequence, width, height) {
         title?.let { this.title = it }
         builder(this)
     }
@@ -29,20 +31,25 @@ fun DashboardParams.barchart(
 
 fun RowParams.barchart(
     title: String? = null,
+    width: Int? = null,
+    height: Int? = null,
     builder: BarchartPanel.() -> Unit
 ) {
     this.dashboardParams.dashboard.panels += BarchartPanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
-        .also { it.gridPos = this.dashboardParams.gridPosSequence.next() }
+        .also { it.gridPos = this.dashboardParams.gridPosSequence.next(width, height) }
         .apply(builder)
 }
 
 fun Dashboard.barchart(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
+    width: Int? = null,
+    height: Int? = null,
     builder: BarchartPanel.() -> Unit
 ) {
     this.panels += BarchartPanel(datasource)
+        .also { it.gridPos = gridPosSequence.next(width, height) }
         .also { it.gridPos = gridPosSequence.next() }
         .apply(builder)
 }
