@@ -13,7 +13,7 @@ data class Dashboard(
     var timezone: Timezone = Timezone.browser,
     var editable: Boolean = false,
     var liveNow: Boolean = true,
-    var panels: MutableList<Panel<@Contextual Any>> = mutableListOf(),
+    var panels: MutableList<Panel<@Contextual Options>> = mutableListOf(),
     var time: TimeRange = (now - 6.h)..now,
     var refresh: Time? = null,
     var templating: Templating = Templating()

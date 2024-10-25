@@ -24,7 +24,7 @@ enum class ToolTipMode {
     Multi
 }
 
-var Panel<Options>.toolTipMode
+var Panel<CommonOptions>.toolTipMode
     get() = this.options.tooltip.mode
     set(value) {
         this.options.tooltip.mode = value

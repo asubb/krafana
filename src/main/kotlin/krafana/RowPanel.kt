@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class RowPanel(
     override var title: String,
     override var gridPos: GridPos,
-): Panel<Any> {
+): DataPanel<Options> {
     override val type: String = "row"
     override val datasource: DataSource
         get() = throw UnsupportedOperationException()
@@ -19,7 +19,7 @@ data class RowPanel(
     override var repeatDirection: RepeatDirection?
         get() = throw UnsupportedOperationException()
         set(value) = throw UnsupportedOperationException()
-    override val options: Options
+    override val options: CommonOptions
         get() = throw UnsupportedOperationException()
 }
 

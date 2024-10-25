@@ -17,6 +17,15 @@ fun generalDashboard(dataSource: DataSource) = dashboard {
                 includeAll = true
             }
         }
+        text("Example") {
+           content = """
+               # Hello
+               
+               ## World
+               
+               ### !
+           """.trimIndent()
+        }
         timeseries("Last minute load average on the machine and vCPU count") {
             query {
                 expr = metric("plexnode_cpu_vcpus_count").filter(instance re instanceVar)

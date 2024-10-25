@@ -3,28 +3,34 @@ package krafana
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TablePanel(
+data class TextPanel(
     override val datasource: DataSource,
-    override val options: CommonOptions = CommonOptions(),
-    override val targets: MutableList<Target> = mutableListOf(),
-    override val fieldConfig: FieldConfig = FieldConfig(),
+    override val options: TextOptions = TextOptions(),
     override var title: String = "",
+    var description: String = "",
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
     var interval: Time? = null,
-    var description: String = "",
-) : DataPanel<CommonOptions> {
-    override val type: String = "table"
+) : Panel<TextOptions> {
+    override val type: String = "text"
 }
 
-fun DashboardParams.table(
+@Serializable
+data class TextOptions(
+    var language: String = "plaintext",
+    var showLineNumbers: Boolean = false,
+    var showMiniMap: Boolean = false,
+    var content: String = "",
+): Options
+
+fun DashboardParams.text(
     title: String? = null,
     width: Int? = null,
     height: Int? = null,
-    builder: TablePanel.() -> Unit,
+    builder: TextPanel.() -> Unit,
 ) {
-    this.dashboard.table(
+    this.dashboard.text(
         this.datasource,
         gridPosSequence,
         title,
@@ -34,32 +40,32 @@ fun DashboardParams.table(
     )
 }
 
-fun RowParams.table(
+fun RowParams.text(
     title: String? = null,
     width: Int? = null,
     height: Int? = null,
-    builder: TablePanel.() -> Unit,
+    builder: TextPanel.() -> Unit,
 ) {
-    this.dashboardParams.dashboard.panels += TablePanel(this.dashboardParams.datasource)
+    this.dashboardParams.dashboard.panels += TextPanel(this.dashboardParams.datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = this.dashboardParams.gridPosSequence.next(width, height) }
         .apply(builder)
 }
 
-fun Dashboard.table(
+fun Dashboard.text(
     datasource: DataSource,
     gridPosSequence: GridPosSequence = constant(),
     title: String? = null,
     width: Int? = null,
     height: Int? = null,
-    builder: TablePanel.() -> Unit,
+    builder: TextPanel.() -> Unit,
 ) {
-    this.panels += TablePanel(datasource)
+    this.panels += TextPanel(datasource)
         .also { it.title = title ?: "" }
         .also { it.gridPos = gridPosSequence.next(width, height) }
         .apply(builder)
 }
 
-fun TablePanel.config(builder: CustomConfig.() -> Unit) {
-    builder(this.fieldConfig.defaults.custom)
-}
+var TextPanel.content: String
+    get() = options.content
+    set(value) { options.content = value}

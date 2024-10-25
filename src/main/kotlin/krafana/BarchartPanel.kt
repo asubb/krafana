@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BarchartPanel(
     override val datasource: DataSource,
-    override val options: Options = Options(),
+    override val options: CommonOptions = CommonOptions(),
     override val targets: MutableList<Target> = mutableListOf(),
     override val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
@@ -13,7 +13,7 @@ data class BarchartPanel(
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
-) : Panel<Options> {
+) : DataPanel<CommonOptions> {
     override val type: String = "barchart"
 }
 

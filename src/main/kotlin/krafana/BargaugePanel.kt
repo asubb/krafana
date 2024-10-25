@@ -14,7 +14,7 @@ data class BargaugePanel(
     override var gridPos: GridPos = GridPos(0, 0, 12, 10),
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
-) : Panel<BargaugeOptions> {
+) : DataPanel<BargaugeOptions> {
     override val type: String = "bargauge"
 }
 
@@ -34,7 +34,7 @@ data class BargaugeOptions(
     var orientation: BarGaugeOrientation = BarGaugeOrientation.horizontal,
     var reduceOptions: ReduceOptions = ReduceOptions(),
     var displayMode: DisplayMode? = null
-)
+) : Options
 
 @Serializable
 enum class DisplayMode {

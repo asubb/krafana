@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TimeseriesPanel(
     override val datasource: DataSource,
-    override val options: Options = Options(),
+    override val options: CommonOptions = CommonOptions(),
     override val targets: MutableList<Target> = mutableListOf(),
     override val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
@@ -14,7 +14,7 @@ data class TimeseriesPanel(
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
     var interval: Time? = null,
-) : Panel<Options> {
+) : DataPanel<CommonOptions> {
     override val type: String = "timeseries"
 }
 

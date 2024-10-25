@@ -1,12 +1,15 @@
 package krafana
 
-interface Panel<out O> {
+interface DataPanel<out O: Options>: Panel<O> {
+    val targets: MutableList<Target>
+    val fieldConfig: FieldConfig
+}
+
+interface Panel<out O: Options> {
     val type: String
     var title: String
     var gridPos: GridPos
     val datasource: DataSource
-    val targets: MutableList<Target>
-    val fieldConfig: FieldConfig
     var repeat: Expr?
     var repeatDirection: RepeatDirection?
     val options: O
@@ -26,13 +29,13 @@ fun Panel<*>.repeatVertical(e: Expr) {
     repeatDirection = RepeatDirection.v
 }
 
-var Panel<*>.measure
+var DataPanel<*>.measure
     get() = fieldConfig.defaults.unit
     set(value) {
         this.fieldConfig.defaults.unit = value
     }
 
-var Panel<*>.colorMode
+var DataPanel<*>.colorMode
     get() = fieldConfig.defaults.color.mode
     set(value) {
         this.fieldConfig.defaults.color.mode = value

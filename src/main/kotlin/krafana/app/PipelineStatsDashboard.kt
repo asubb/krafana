@@ -431,7 +431,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
     }
 }
 
-private fun Panel<*>.pipelineUsedHeap() {
+private fun DataPanel<*>.pipelineUsedHeap() {
     val a = query {
         expr = snapRingBufferUsedBytes
             .filter(ruuid re ruuidVar, instance re instanceVar)
@@ -453,7 +453,7 @@ private fun Panel<*>.pipelineUsedHeap() {
     }
 }
 
-private fun Panel<*>.pipelineUsedCPU() {
+private fun DataPanel<*>.pipelineUsedCPU() {
     val allPipelinesConsumption = query {
         expr = snapCpuTime
             .filter(
