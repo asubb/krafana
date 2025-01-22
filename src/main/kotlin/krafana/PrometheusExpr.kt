@@ -1,5 +1,7 @@
 package krafana
 
+import kotlin.time.Duration
+
 infix fun Expr.eq(v: String): Filter {
     return Filter(this, value(v), "=")
 }
@@ -17,7 +19,7 @@ infix fun Expr.ne(v: String): Filter {
 }
 
 operator fun Expr.minus(other: Expr): Expr {
-    return Expr("${this.value}-${other.value}")
+    return Expr("(${this.value}-${other.value})")
 }
 
 fun Expr.filter(vararg filters: Filter): Expr {
@@ -129,4 +131,12 @@ fun Expr.quantileOverTime(quantile: Double, time: Time): Expr {
 
 fun Expr.lastOverTime(time: Time): Expr {
     return Expr("last_over_time($this[$time])")
+}
+
+fun Expr.offset(offset: Time): Expr {
+    return Expr("($this offset $offset)")
+}
+
+fun Expr.topk(top: Int): Expr {
+    return Expr("topk($top, $this)")
 }

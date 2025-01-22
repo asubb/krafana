@@ -45,3 +45,5 @@ val now
 operator fun Time.minus(to: Time) = Time(this.v, this.u, to.v, to.u)
 
 operator fun Time.rangeTo(to: Time): TimeRange = TimeRange(this, to)
+
+operator fun Time.unaryMinus(): Time = Time(-this.v, this.u, this.v2?.let { -it }, this.u2)
