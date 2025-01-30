@@ -8,6 +8,19 @@ data class Config(
     var unit: Measure = Measure.none,
     var custom: CustomConfig = CustomConfig(),
     var color: ColorConfig = ColorConfig(),
+    var thresholds: Thresholds? = null,
+)
+
+@Serializable
+data class Thresholds(
+    var mode: String = "absolute",
+    var steps: MutableList<Step> = mutableListOf<Step>(),
+)
+
+@Serializable
+data class Step(
+    val color: String,
+    val value: Int?,
 )
 
 @Serializable
@@ -17,7 +30,24 @@ data class CustomConfig(
     var stacking: Stacking = Stacking(),
     var axisCenteredZero: Boolean? = null,
     var axisSoftMin: Int? = null,
+    var gradientMode: GradientMode = GradientMode.none,
+    var showPoints: ShowPoints = ShowPoints.auto
 )
+
+@Serializable
+enum class ShowPoints {
+    never,
+    always,
+    auto
+}
+
+@Serializable
+enum class GradientMode {
+    none,
+    opacity,
+    hue,
+    scheme
+}
 
 @Serializable
 data class Stacking(
@@ -56,8 +86,23 @@ data class FieldConfig(
 
 @Serializable
 data class ColorConfig(
-    var mode: String = "palette-classic"
+    var mode: ColorConfigMode = ColorConfigMode.palleteClassic,
 )
+
+@Serializable
+enum class ColorConfigMode {
+    @SerialName("palette-classic")
+    palleteClassic,
+
+    @SerialName("thresholds")
+    thresholds,
+
+    @SerialName("continuous-GrYlRd")
+    continuousGrYlRd,
+
+    @SerialName("continuous-BlPu")
+    continuousBlPu,
+}
 
 @Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
 @Serializable(AsStringSerializer::class)

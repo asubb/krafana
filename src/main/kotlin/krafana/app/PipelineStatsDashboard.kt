@@ -171,7 +171,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             }
             bargauge("Top pipelines CPU usage by path (average time for execution)") {
                 measure = Measure.ns
-                colorMode = "continuous-GrYlRd"
+                colorMode = ColorConfigMode.continuousGrYlRd
                 reduceOptions(calcs = mean)
                 val usageByPath = query {
                     expr = pipelineCpuTime.deltaInterval().sumBy(path)
@@ -187,7 +187,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             }
             bargauge("Top pipelines CPU usage by executions") {
                 measure = Measure.ns
-                colorMode = "continuous-GrYlRd"
+                colorMode = ColorConfigMode.continuousGrYlRd
                 reduceOptions(calcs = mean)
                 val usageByPath = query {
                     expr = pipelineCpuTime.deltaInterval().sumBy(ruuid)
@@ -375,7 +375,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             }
             bargauge("Top pipelines memory usage by path (average per pipeline)") {
                 measure = Measure.bytes
-                colorMode = "continuous-GrYlRd"
+                colorMode = ColorConfigMode.continuousGrYlRd
                 reduceOptions(calcs = mean)
                 val usageByPath = query {
                     expr = snapRingBufferUsedBytes
@@ -402,7 +402,7 @@ fun pipelineStatsDashboard(dataSource: DataSource) = dashboard {
             }
             bargauge("Top pipelines memory usage by executions") {
                 measure = Measure.bytes
-                colorMode = "continuous-GrYlRd"
+                colorMode = ColorConfigMode.continuousGrYlRd
                 reduceOptions(calcs = mean)
                 val usageByPath = query {
                     expr = snapRingBufferUsedBytes

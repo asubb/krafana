@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TimeseriesPanel(
     override val datasource: DataSource,
-    override val options: CommonOptions = CommonOptions(),
+    override val options: TimeseriesOptions = TimeseriesOptions(),
     override val targets: MutableList<Target> = mutableListOf(),
     override val fieldConfig: FieldConfig = FieldConfig(),
     override var title: String = "",
@@ -14,9 +14,16 @@ data class TimeseriesPanel(
     override var repeat: Expr? = null,
     override var repeatDirection: RepeatDirection? = null,
     var interval: Time? = null,
-) : DataPanel<CommonOptions> {
+) : DataPanel<TimeseriesOptions> {
     override val type: String = "timeseries"
 }
+
+
+@Serializable
+data class TimeseriesOptions(
+    var tooltip: ToolTip = ToolTip(),
+    var legend: Legend = Legend(),
+) : Options
 
 fun DashboardParams.timeseries(
     title: String? = null,
@@ -68,4 +75,11 @@ fun Dashboard.timeseries(
 
 fun TimeseriesPanel.config(builder: CustomConfig.() -> Unit) {
     builder(this.fieldConfig.defaults.custom)
+}
+
+fun TimeseriesPanel.thresholds(builder: Thresholds.() -> Unit) {
+    if (fieldConfig.defaults.thresholds == null) {
+        fieldConfig.defaults.thresholds = Thresholds()
+    }
+    builder(this.fieldConfig.defaults.thresholds!!)
 }
