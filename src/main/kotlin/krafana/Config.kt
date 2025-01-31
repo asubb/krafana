@@ -30,6 +30,7 @@ data class CustomConfig(
     var stacking: Stacking = Stacking(),
     var axisCenteredZero: Boolean? = null,
     var axisSoftMin: Int? = null,
+    var axisSoftMax: Int? = null,
     var gradientMode: GradientMode = GradientMode.none,
     var showPoints: ShowPoints = ShowPoints.auto
 )
