@@ -1,6 +1,9 @@
 package krafana
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class TimeseriesPanel(
@@ -75,6 +78,52 @@ fun Dashboard.timeseries(
 
 fun TimeseriesPanel.config(builder: CustomConfig.() -> Unit) {
     builder(this.fieldConfig.defaults.custom)
+}
+
+fun TimeseriesPanel.override(builder: FieldOverride.() -> Unit) {
+    this.fieldConfig.overrides += FieldOverride().apply(builder)
+}
+
+fun FieldOverride.match(type: MatcherType, builder: () -> String?) {
+    matcher.id = type
+    matcher.options = builder()
+}
+
+fun <T> FieldOverride.property(id: String, builder: () -> T) {
+    properties += PropertyOverride(
+        id,
+        Json.encodeToJsonElement(AnySerializer, builder())
+    )
+}
+
+object AnySerializer : kotlinx.serialization.KSerializer<Any?> {
+    override val descriptor = String.serializer().descriptor
+
+    override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: Any?) {
+        val jsonEncoder = encoder as? kotlinx.serialization.json.JsonEncoder
+            ?: throw IllegalStateException("Can only encode JSON")
+        when (value) {
+            is String -> jsonEncoder.encodeString(value)
+            is Number -> jsonEncoder.encodeDouble(value.toDouble())
+            is Boolean -> jsonEncoder.encodeBoolean(value)
+            is Map<*, *> -> jsonEncoder.encodeSerializableValue(
+                MapSerializer(String.serializer(), AnySerializer),
+                value as Map<String, Any?>
+            )
+
+            is List<*> -> jsonEncoder.encodeSerializableValue(
+                kotlinx.serialization.builtins.ListSerializer(AnySerializer),
+                value
+            )
+
+            null -> jsonEncoder.encodeNull()
+            else -> jsonEncoder.encodeString(value.toString()) // Fallback for unsupported types
+        }
+    }
+
+    override fun deserialize(decoder: kotlinx.serialization.encoding.Decoder): Any? {
+        throw NotImplementedError("Deserialization not supported")
+    }
 }
 
 fun TimeseriesPanel.thresholds(builder: Thresholds.() -> Unit) {

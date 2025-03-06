@@ -2,6 +2,7 @@ package krafana
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class Config(
@@ -32,7 +33,7 @@ data class CustomConfig(
     var axisSoftMin: Int? = null,
     var axisSoftMax: Int? = null,
     var gradientMode: GradientMode = GradientMode.none,
-    var showPoints: ShowPoints = ShowPoints.auto
+    var showPoints: ShowPoints = ShowPoints.auto,
 )
 
 @Serializable
@@ -53,7 +54,7 @@ enum class GradientMode {
 @Serializable
 data class Stacking(
     var group: String = "A",
-    var mode: StackingMode = StackingMode.None
+    var mode: StackingMode = StackingMode.None,
 )
 
 @Serializable
@@ -83,6 +84,69 @@ enum class DrawStyle {
 @Serializable
 data class FieldConfig(
     var defaults: Config = Config(),
+    var overrides: MutableList<FieldOverride> = mutableListOf(),
+)
+
+@Serializable
+data class FieldOverride(
+    var matcher: Matcher = Matcher(),
+    var properties: MutableList<PropertyOverride> = mutableListOf(),
+)
+
+@Serializable
+data class Matcher(
+    var id: MatcherType = MatcherType.byName,
+    var options: String? = null,
+)
+
+/**
+ * Represents the possible matcher types for applying overrides in Grafana.
+ * Each matcher specifies the fields or series that a specific override rule applies to.
+ */
+@Serializable
+enum class MatcherType {
+
+    /**
+     * Matches fields by their **name** as they appear in the legend.
+     */
+    @SerialName("byName")
+    byName,
+
+    /**
+     * Matches fields by the **RefID** of the query (e.g., `"A"`, `"B"`, etc.).
+     */
+    @SerialName("byFrameRefID")
+    byFrameRefId,
+
+    /**
+     * Matches fields using a **regular expression** on their names.
+     */
+    @SerialName("byRegex")
+    byRegex,
+
+    /**
+     * Matches fields based on their **value type** (e.g., numeric, string, etc.).
+     */
+    @SerialName("byType")
+    byType,
+
+    /**
+     * Matches fields by their **exact internal field name**.
+     */
+    @SerialName("byFieldName")
+    byFieldName,
+
+    /**
+     * Matches fields based on their **null value mode** (e.g., Null as Zero).
+     */
+    @SerialName("byNullValueMode")
+    byNullValueMode
+}
+
+@Serializable
+data class PropertyOverride(
+    var id: String,
+    var value: JsonElement? = null,
 )
 
 @Serializable
@@ -108,7 +172,7 @@ enum class ColorConfigMode {
 @Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
 @Serializable(AsStringSerializer::class)
 class LegendFormat(
-    val format: String
+    val format: String,
 ) : SerializableAsString {
     override fun serialize(): String {
         return format

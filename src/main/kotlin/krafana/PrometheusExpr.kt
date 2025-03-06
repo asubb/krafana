@@ -133,6 +133,10 @@ fun Expr.lastOverTime(time: Time): Expr {
     return Expr("last_over_time($this[$time])")
 }
 
+fun Expr.avgOverTime(time: Time): Expr {
+    return Expr("avg_over_time($this[$time])")
+}
+
 fun Expr.offset(offset: Time): Expr {
     return Expr("($this offset $offset)")
 }
