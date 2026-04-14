@@ -30,6 +30,10 @@ fun Expr.rate(interval: Time): Expr {
     return Expr("rate(${this.value}[$interval])")
 }
 
+fun Expr.rateInterval(): Expr {
+    return Expr("rate(${this.value}[\$__interval])")
+}
+
 fun Expr.count(): Expr = countBy()
 
 fun Expr.countBy(vararg by: Expr): Expr {
@@ -121,6 +125,10 @@ fun Metric.labelValues(label: Label): Expr {
     return Expr("label_values(${this.value}, ${label.value})")
 }
 
+fun Expr.labelValues(label: Label): Expr {
+    return Expr("label_values(${this.value}, ${label.value})")
+}
+
 fun labelValues(label: Label): Expr {
     return Expr("label_values(${label.value})")
 }
@@ -143,4 +151,8 @@ fun Expr.offset(offset: Time): Expr {
 
 fun Expr.topk(top: Int): Expr {
     return Expr("topk($top, $this)")
+}
+
+fun Expr.histogramQuantile(q: Double): Expr {
+    return Expr("histogram_quantile($q, ${this.value})")
 }

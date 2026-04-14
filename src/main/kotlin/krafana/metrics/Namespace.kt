@@ -16,7 +16,7 @@ class Histogram(namespaces: List<String>, name: String) {
     val p95: Metric = namespaces.metric(name, "95pct")
     val p75: Metric = namespaces.metric(name, "75pct")
     val median: Metric = namespaces.metric(name, "median")
-    val avg: Metric = namespaces.metric(name, "avg")
+    val avg: Metric = namespaces.metric(name, "mean")
     val max: Metric = namespaces.metric(name, "max")
     val stddev: Metric = namespaces.metric(name, "stddev")
     val count: Metric = namespaces.metric(name, "count")

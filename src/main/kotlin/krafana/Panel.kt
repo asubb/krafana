@@ -1,11 +1,11 @@
 package krafana
 
-interface DataPanel<out O: Options>: Panel<O> {
+sealed interface DataPanel<out O: Options>: Panel<O> {
     val targets: MutableList<Target>
     val fieldConfig: FieldConfig
 }
 
-interface Panel<out O: Options> {
+sealed interface Panel<out O: Options> {
     val type: String
     var title: String
     var gridPos: GridPos

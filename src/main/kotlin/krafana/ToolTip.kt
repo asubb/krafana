@@ -21,7 +21,10 @@ enum class ToolTipMode {
     Single,
 
     @SerialName("multi")
-    Multi
+    Multi,
+
+    @SerialName("all")
+    All,
 }
 
 var Panel<CommonOptions>.toolTipMode

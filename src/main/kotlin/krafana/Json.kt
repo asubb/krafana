@@ -14,6 +14,7 @@ val json = Json {
         polymorphic(Panel::class, BarchartPanel::class, BarchartPanel.serializer())
         polymorphic(Panel::class, TablePanel::class, TablePanel.serializer())
         polymorphic(Panel::class, TextPanel::class, TextPanel.serializer())
+        polymorphic(Panel::class, HeatmapPanel::class, HeatmapPanel.serializer())
     }
     encodeDefaults = true
     explicitNulls = false

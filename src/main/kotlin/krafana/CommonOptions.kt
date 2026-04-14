@@ -2,9 +2,8 @@ package krafana
 
 import kotlinx.serialization.Serializable
 
-interface Options {
+sealed interface Options
 
-}
 @Serializable
 data class CommonOptions(
     var tooltip: ToolTip = ToolTip(),
