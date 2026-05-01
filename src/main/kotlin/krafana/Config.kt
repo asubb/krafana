@@ -32,8 +32,30 @@ data class CustomConfig(
     var axisCenteredZero: Boolean? = null,
     var axisSoftMin: Int? = null,
     var axisSoftMax: Int? = null,
+    var axisBorderShow: Boolean? = null,
+    var axisLabel: String? = null,
+    var axisPlacement: String? = null,
+    var barAlignment: Int? = null,
+    var barWidthFactor: Double? = null,
+    var insertNulls: Boolean? = null,
+    var lineInterpolation: String? = null,
+    var lineWidth: Int? = null,
+    var pointSize: Int? = null,
+    var scaleDistribution: ScaleDistribution? = null,
+    var spanNulls: Boolean? = null,
+    var thresholdsStyle: ThresholdsStyle? = null,
     var gradientMode: GradientMode = GradientMode.none,
     var showPoints: ShowPoints = ShowPoints.auto,
+)
+
+@Serializable
+data class ScaleDistribution(
+    var type: String = "linear"
+)
+
+@Serializable
+data class ThresholdsStyle(
+    var mode: String = "off"
 )
 
 @Serializable
